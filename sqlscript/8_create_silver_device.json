@@ -1,0 +1,20 @@
+{
+	"name": "8_create_silver_device",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\n/*\nif object_id('silver.device') IS NOT NULL DROP EXTERNAL TABLE silver.device\nGO\n-- cant delete file here in sql\n\nCREATE EXTERNAL TABLE silver.device\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/device',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.vw_device\n;\n\nselect top 1000 * from silver.device\n*/\n\nEXEC silver.usp_silver_device 'D994BF29','2022','12','27'\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"name": "12_create_FeulRate_view",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "\nuse oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_FuelRate\nGO\n-- create view for device views\nCREATE VIEW silver.vw_FuelRate\nAS\n\nSELECT\n\t[timestamp]\n\t,[Date]\t\t\t\t= convert(date,[timestamp])\n\t,[Time]\t\t\t\t\t= convert(time,timestamp)\n\t--,[TimeStamp]\t\t\t= cast(convert(date,left([timestamp],10)) as datetime) + cast(convert(time,left(right([timestamp],16),8)) as datetime)\n\t,[Year]\t\t\t\t\t= datepart(year,timestamp)\n\t,[Month]\t\t\t\t= datepart(month,timestamp)\n\t,[Day]\t\t\t\t\t= datepart(day,timestamp) \n\t,[Hour]\t\t\t\t\t= datepart(hour,timestamp)\n\t,[Minute]\t\t\t\t= datepart(minute,timestamp) \n\t,[Second]\t\t\t\t= datepart(second,timestamp)\n\t,[GallonPerHour]\t\t= isnull([FuelRateAverage],0) * 264.17205234375 --https://www.xconvert.com/unit-converter/cubic-meters-per-hour-to-gallons-per-hour\n\t,[TotalGallons]\t\t\t= ((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5 --Get per second, and only have data every 5th second\n\t,[DolloarGallons]\t\t= (((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 4.5 --https://www.eia.gov/petroleum/gasdiesel/\n\t,[Co2Kg]\t\t\t\t= (isnull([FuelRateAverage],0) * 264.17205234375) * 10.19 --https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references\n\t,[PetrolGallonPerHour]\t= (isnull([FuelRateAverage],0) * 264.17205234375) * 1.5  --Just quessing, still need info from Oxe\n\t,[TotalPetrolGallons]\t= (((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 1.5 --Get per second, and only have data every 5th second\n\t,[DollarPetrolGallons]\t= (((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 1.5  --[TotalPetrolGallons] * Petrol Price per gallon\n\t,[PetrolCo2Kg]\t\t\t= ((isnull([FuelRateAverage],0) * 264.17205234375) * 1.5) * 8.887 --https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references\n\t,[DollarSavings]\t\t= ((((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 1.5) - (((([FuelRateAverage] * 264.17205234375) / 60) * 5) * 4.5)   --[DollarPetrolGallons] - [DolloarGallons]\n\t,[Co2Savings]\t\t\t= (((isnull([FuelRateAverage],0) * 264.17205234375) * 1.5) * 8.887) - (([FuelRateAverage] * 264.17205234375) * 10.19)  --[PetrolCo2Kg] - [Co2Kg]\n\t\n\t,[EngineNumber]\t\t\t=\tEngineInstance\n    , EngineSerialnumber\n    --CASE [EngineSerialnumber]\n\t--WHEN '3000184' THEN 1\n\t--WHEN '3000206' THEN 2\n\t--ELSE 0\n\t--END\n\t\nFROM\n\tsilver.vw_device\nwhere device='D994BF29' --and year=2023 and month=02 and day=12\nAND\n\tEngineInstance > 0\n--order by timestamp\n\n\n-- select * from silver.vw_FuelRate order by timestamp\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": -1
+		},
+		"type": "SqlQuery"
+	}
+}

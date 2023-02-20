@@ -1,0 +1,20 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"folder": {
+			"name": "Discovery"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\n\n\nExec sp_describe_first_result_set N'\nSELECT\n    top 100 *\nFROM\n    OPENROWSET(\n        BULK ''abfss://fs-oxe-bronze@stoxemarine.dfs.core.windows.net/outputcsv/50B8FE41-20221104-636515D3.csv'',\n        FORMAT = ''CSV'',\n        PARSER_VERSION = ''2.0'',\n        HEADER_ROW = TRUE\n    ) AS [result] '\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

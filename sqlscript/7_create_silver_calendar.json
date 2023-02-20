@@ -1,0 +1,20 @@
+{
+	"name": "7_create_silver_calendar",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.calendar') IS NOT NULL DROP EXTERNAL TABLE silver.calendar\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.calendar\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/calendar',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.calendar\n;\n\nselect * from silver.calendar\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

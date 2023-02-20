@@ -1,0 +1,19 @@
+{
+	"name": "ds_textdata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_fsoxe_sub",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "textdata/DEVICE",
+				"fileSystem": "fs-oxe"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -1,0 +1,18 @@
+{
+	"name": "ds_canedge_test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_canedge_test",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "canedge"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

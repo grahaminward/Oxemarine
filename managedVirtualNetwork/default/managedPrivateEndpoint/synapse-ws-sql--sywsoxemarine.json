@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sql--sywsoxemarine",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Synapse/workspaces/sywsoxemarine",
+		"groupId": "sql",
+		"fqdns": [
+			"sywsoxemarine.75f4cb58-e6c1-4a5b-a708-c7c17422b25f.sql.azuresynapse.net"
+		]
+	}
+}

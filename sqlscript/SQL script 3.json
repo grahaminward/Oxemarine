@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 3",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [CompressorOutTemp]\n,[date_key]\n,[TotalEngineHours]\n,[Latitude]\n,[FuelRateAverage]\n,[GearCommand]\n,[EngineSpeed]\n,[EngineSerialnumber]\n,[SpeedOverGround_kn]\n,[PropellerSpeed]\n,[month]\n,[EngineRoomTemp]\n,[EngineOilPressure]\n,[PortCylinderPosition]\n,[IntakeManifoldTemp]\n,[year]\n,[EngineCoolantTemp]\n,[GpcModuleFaults]\n,[GearboxGear]\n,[PressureSource]\n,[FuelRate]\n,[EngineModel]\n,[CourseOverGround]\n,[FuelUsed]\n,[PttTrim]\n,[EngineFwVersion]\n,[SpeedOverGround]\n,[GpcState]\n,[ControlheadPosition]\n,[TemperatureSource]\n,[EngineInstance]\n,[RequestClutchSlip]\n,[EcuTemp]\n,[day]\n,[StbdCylinderPosition]\n,[GearboxOilPressure]\n,[FuelRailPressure]\n,[EngineLoad]\n,[Longitude]\n,[ThrottleCommand]\n,[AtmosphericPressure]\n,[BoostPressure]\n,[EngineSwVersion]\n,[CourseOverGround_deg]\n,[ActualClutchSlip]\n,[ExhaustGasTemp]\n,[device]\n,[EngineOilTemp]\n,[GpcDuty]\n,[timestamp]\n,[FuelTemp]\n,[BatteryVoltage]\n,[GearboxOilTemp]\n FROM [silver].[vw_device]\n ",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

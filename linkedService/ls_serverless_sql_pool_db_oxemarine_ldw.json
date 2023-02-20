@@ -1,0 +1,15 @@
+{
+	"name": "ls_serverless_sql_pool_db_oxemarine_ldw",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDW",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sywsoxemarine-ondemand.sql.azuresynapse.net;Initial Catalog=oxemarine_ldw"
+		},
+		"connectVia": {
+			"referenceName": "IR-OxeMarine",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"name": "ds_canedge",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_canedge",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "*.MF4",
+				"container": "canedge"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

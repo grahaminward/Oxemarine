@@ -1,0 +1,18 @@
+{
+	"name": "ds_outputcsv_bin",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_outputcsv",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "outputcsv"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

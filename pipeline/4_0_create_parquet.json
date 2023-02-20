@@ -1,0 +1,30 @@
+{
+	"name": "4_0_create_parquet",
+	"properties": {
+		"activities": [
+			{
+				"name": "Stored procedure1",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[silver].[usp_load_parquet]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_ldw",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-02-10T04:58:52Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

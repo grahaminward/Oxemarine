@@ -1,0 +1,20 @@
+{
+	"name": "6_create_silver_dbc_lookup",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.dbc_lookup') IS NOT NULL DROP EXTERNAL TABLE silver.dbc_lookup\nGO\n-- cant delete file here in sql\n\nCREATE EXTERNAL TABLE silver.dbc_lookup\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/dbc_lookup',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.dbc_lookup\nGO\n\nselect * from silver.dbc_lookup\n\n\nselect top 100 \n        a.device\n        , a.year\n        , a.month\n        , a.day\n        , a.GpcState\n        , b.LU_Value\n\nfrom silver.vw_device a \nleft join silver.dbc_lookup b \non a.GpcState = b.LU_Key  AND b.LookupColName='GpcState'\n\nwhere device='D994BF29' and year=2022 and month=12 and day=27\norder by timestamp\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

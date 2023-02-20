@@ -1,0 +1,19 @@
+{
+	"name": "ds_received_bin_item",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_stdetoxmarine",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "@",
+				"fileSystem": "receivedcsv"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

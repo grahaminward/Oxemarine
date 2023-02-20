@@ -1,0 +1,20 @@
+{
+	"name": "2_create_external_data_sources",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\nif not exists (select * from sys.external_data_sources where name='oxemarine_src')\n    CREATE EXTERNAL DATA SOURCE oxemarine_src\n    WITH (\n        LOCATION    = 'https://stdetoxemarine.dfs.core.windows.net/fs-oxe'\n        --LOCATION    = 'https://stoxemarine.blob.core.windows.net/fs-oxe-bronze'\n    )\n    ;\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,93 @@
+{
+	"name": "99_process_incomming_csvfiles",
+	"properties": {
+		"activities": [
+			{
+				"name": "Move csv to received",
+				"description": "Move from decoded outputcsv to receivedcsv",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "1_move_outputcsv",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Disperse csv to textdata",
+				"description": "Uses file name to place csv in partitioned directory structure in textdata",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Move csv to received",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2_disperse_csv",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Convert to parquet",
+				"description": "reads in text files and converts it to parquet retaining partition directory structure",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Disperse csv to textdata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "4_create_parquet",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Remove textdata",
+				"description": "Removes all items in textdata to prevent re-processing of duplicate data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Convert to parquet",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "5_post_process_textdata",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"variables": {
+			"FilesTocopy": {
+				"type": "Boolean",
+				"defaultValue": false
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-02-14T14:19:26Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}
