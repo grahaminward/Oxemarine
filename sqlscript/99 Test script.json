@@ -1,0 +1,20 @@
+{
+	"name": "99 Test script",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "exec silver.usp_silver_device '4CC52878','2023', '03', '01'\n\n\nCREATE EXTERNAL TABLE silver.device_4CC52878_2023_03_01_10_07_07_4352716 WITH ( DATA_SOURCE = oxemarine_src, LOCATION = 'silver/DEVICE/Device=4CC52878/year=2023/month=03/day=01/10_07_07_4352716', FILE_FORMAT = parquet_file_format ) AS with getModel as ( select device, EngineInstance, EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber, best_row = row_number() over (Partition by device,EngineInstance, EngineModel order by tot_Len desc) from ( select distinct device, [EngineInstance] = case when [EngineOilPressure0] is not null then 1 when [EngineOilPressure1] is not null then 2 when [EngineOilPressure2] is not null then 3 when [EngineOilPressure3] is not null then 4 else -1 end, EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber, tot_Len = len(EngineSwVersion) + len(EngineFwVersion) + len(EngineSerialnumber) FROM bronze.vw_device WHERE device = '4CC52878' AND year = '2023' AND month = '03' AND day = '01' AND EngineModel is not NULL AND EngineSwVersion is not NULL AND EngineFwVersion is not NULL AND EngineSerialnumber is not null ) a ) SELECT v.device, v.year, v.month, v.day, [timestamp] ,[PressureSource] ,[AtmosphericPressure] ,[FuelRailPressure] ,[GearCommand] ,[ThrottleCommand] ,[CourseOverGround] ,[CourseOverGround_deg] ,[SpeedOverGround] ,[SpeedOverGround_kn] ,[EngineInstance] = g.EngineInstance ,[EngineOilPressure] = case when [EngineOilPressure0] is not null then [EngineOilPressure0] when [EngineOilPressure1] is not null then [EngineOilPressure1] when [EngineOilPressure2] is not null then [EngineOilPressure2] when [EngineOilPressure3] is not null then [EngineOilPressure3] else null end ,[EngineOilTemp] ,[EngineCoolantTemp] ,[BatteryVoltage] ,[FuelRate] ,[TotalEngineHours] ,[EngineLoad] ,[EngineSpeed] ,[BoostPressure] ,[PttTrim] ,[ActualClutchSlip] ,[ControlheadPosition] ,[PropellerSpeed] ,[RequestClutchSlip] ,[GpcState] ,[GpcDuty] ,[GpcModuleFaults] ,[PortCylinderPosition] ,[StbdCylinderPosition] ,[Latitude] ,[Longitude] ,[EngineModel] = ISNULL(g.EngineModel, v.EngineModel) ,[EngineSwVersion] = ISNULL(g.EngineSwVersion, v.EngineSwVersion) ,[EngineFwVersion] = ISNULL(g.EngineFwVersion,v.EngineFwVersion) ,[EngineSerialnumber] = ISNULL(g.EngineSerialnumber, v.EngineSerialnumber) ,[TemperatureSource] ,[EngineRoomTemp] ,[ExhaustGasTemp] ,[IntakeManifoldTemp] ,[FuelTemp] ,[EcuTemp] ,[CompressorOutTemp] ,[GearboxOilPressure] ,[GearboxGear] ,[GearboxOilTemp] ,[FuelUsed] ,[FuelRateAverage] FROM bronze.vw_device v JOIN getModel g ON v.device = g.device AND (case when v.[EngineOilPressure0] is not null then 1 when v.[EngineOilPressure1] is not null then 2 when v.[EngineOilPressure2] is not null then 3 when v.[EngineOilPressure3] is not null then 4 else -1 end) = g.EngineInstance AND v.EngineModel = g.EngineModel WHERE v.device = '4CC52878' AND v.year = '2023' AND v.month = '03' AND v.day = '01'\nDROP EXTERNAL TABLE silver.device_4CC52878_2023_03_01_10_07_07_4352716",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
