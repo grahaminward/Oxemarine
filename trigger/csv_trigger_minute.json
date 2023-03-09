@@ -16,7 +16,7 @@
 		"typeProperties": {
 			"recurrence": {
 				"frequency": "Minute",
-				"interval": 10,
+				"interval": 60,
 				"startTime": "2023-02-15T11:09:00",
 				"timeZone": "South Africa Standard Time"
 			}
