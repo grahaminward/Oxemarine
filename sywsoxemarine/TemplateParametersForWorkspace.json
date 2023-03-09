@@ -1,0 +1,81 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "sywsoxemarine"
+		},
+		"ls_base2_accountKey": {
+			"value": ""
+		},
+		"ls_canedge_connectionString": {
+			"value": ""
+		},
+		"ls_canedge_1_connectionString": {
+			"value": ""
+		},
+		"ls_canedge_test_accountKey": {
+			"value": ""
+		},
+		"ls_csvstore_accountKey": {
+			"value": ""
+		},
+		"ls_fsoxe_accountKey": {
+			"value": ""
+		},
+		"ls_fsoxe_sub_accountKey": {
+			"value": ""
+		},
+		"ls_ldw_connectionString": {
+			"value": ""
+		},
+		"ls_mdftoprocess_connectionString": {
+			"value": ""
+		},
+		"ls_outputcsv_accountKey": {
+			"value": ""
+		},
+		"ls_serverless_sql_pool_db_oxemarine_ldw_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sywsoxemarine-ondemand.sql.azuresynapse.net;Initial Catalog=oxemarine_ldw"
+		},
+		"ls_stdetoxmarine_accountKey": {
+			"value": ""
+		},
+		"sywsoxemarine-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:sywsoxemarine.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"ls_base2_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_canedge_test_properties_typeProperties_url": {
+			"value": "https://stdetoxeraw.dfs.core.windows.net/"
+		},
+		"ls_csvstore_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_fsoxe_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_fsoxe_sub_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_output_csv_files_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_outputcsv_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_stdetoxmarine_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"sywsoxemarine-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net"
+		},
+		"NewCSV_properties_typeProperties_scope": {
+			"value": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxemarine"
+		},
+		"trigger_mf4_arrives_properties_typeProperties_scope": {
+			"value": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxeraw"
+		}
+	}
+}

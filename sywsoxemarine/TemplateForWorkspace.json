@@ -1,0 +1,3496 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "sywsoxemarine"
+		},
+		"ls_base2_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_base2'"
+		},
+		"ls_canedge_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_canedge'"
+		},
+		"ls_canedge_1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_canedge_1'"
+		},
+		"ls_canedge_test_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_canedge_test'"
+		},
+		"ls_csvstore_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_csvstore'"
+		},
+		"ls_fsoxe_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_fsoxe'"
+		},
+		"ls_fsoxe_sub_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_fsoxe_sub'"
+		},
+		"ls_ldw_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_ldw'"
+		},
+		"ls_mdftoprocess_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_mdftoprocess'"
+		},
+		"ls_outputcsv_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_outputcsv'"
+		},
+		"ls_serverless_sql_pool_db_oxemarine_ldw_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_serverless_sql_pool_db_oxemarine_ldw'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sywsoxemarine-ondemand.sql.azuresynapse.net;Initial Catalog=oxemarine_ldw"
+		},
+		"ls_stdetoxmarine_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_stdetoxmarine'"
+		},
+		"sywsoxemarine-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sywsoxemarine-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:sywsoxemarine.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"ls_base2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_canedge_test_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxeraw.dfs.core.windows.net/"
+		},
+		"ls_csvstore_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_fsoxe_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_fsoxe_sub_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_output_csv_files_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_outputcsv_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_stdetoxmarine_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"sywsoxemarine-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net"
+		},
+		"NewCSV_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxemarine"
+		},
+		"trigger_mf4_arrives_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxeraw"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/0_copy_from_canedge')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Copies files from canEdge to archive and mdftoprocess ready for decoding.",
+				"activities": [
+					{
+						"name": "Copy to mdftoprocess",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.MF4"
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"maxConcurrentConnections": 20,
+									"copyBehavior": "PreserveHierarchy"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_canedge",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_mdftoprocess",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy to archive",
+						"description": "Copies MF4 files in Hierarchy with device name, then removes file from canedge",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy to mdftoprocess",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "BinarySource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.MF4",
+									"deleteFilesAfterCompletion": true
+								},
+								"formatSettings": {
+									"type": "BinaryReadSettings"
+								}
+							},
+							"sink": {
+								"type": "BinarySink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"maxConcurrentConnections": 20,
+									"copyBehavior": "PreserveHierarchy"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_canedge_test",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_archive",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesCount": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-17T13:06:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_canedge')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_mdftoprocess')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_canedge_test')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_archive')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/1_move_outputcsv')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata outputcsv",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_received",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata outputcsv",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FilesCount",
+							"value": {
+								"value": "@activity('Get Metadata outputcsv').output.exists",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Set variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Copy to receivedcsv",
+									"description": "Copies csv files from output of decode process to receivedcsv for further processing",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"wildcardFileName": "*.csv",
+												"deleteFilesAfterCompletion": true
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"maxConcurrentConnections": 20
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_outputcsv_bin",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_received_bin",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesCount": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-17T13:06:30Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_received')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_outputcsv_bin')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2_disperse_csv')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get CSV filenames",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_received",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Filter csv files",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Get CSV filenames",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get CSV filenames').output.childItems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endswith(item().name,'.csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy to textdata",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter csv files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter csv files').output.Value\n\n",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy to Folder",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"wildcardFileName": {
+													"value": "@item().Name",
+													"type": "Expression"
+												},
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"maxConcurrentConnections": 100
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_outputcsv",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"foldername": {
+													"value": "@concat(\n'textdata/DEVICE/Device=',\nsubstring(item().Name,0,8),\n'/year=',\nsubstring(item().Name,9,4),\n'/month=',\nsubstring(item().Name,13,2),\n'/day=',\nsubstring(item().Name,15,2)\n\n)",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-17T18:07:42Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_received')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_outputcsv')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_dynamic')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4_0_create_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Stored procedure1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[silver].[usp_load_parquet]"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_ldw",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-10T04:58:52Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_ldw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4_create_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata textdata",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_textdata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata textdata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FilesCount",
+							"value": {
+								"value": "@activity('Get Metadata textdata').output.exists",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Set variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Create Silver Device data",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "ls_serverless_sql_pool_db_oxemarine_ldw",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": "EXEC silver.usp_load_parquet"
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesCount": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-14T14:09:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_textdata')]",
+				"[concat(variables('workspaceId'), '/linkedServices/ls_serverless_sql_pool_db_oxemarine_ldw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/5_post_process_textdata')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata textdata",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_textdata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata textdata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FilesCount",
+							"value": {
+								"value": "@activity('Get Metadata textdata').output.exists",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Set variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Delete text",
+									"description": "Removes csv files from text data so they are not re-processed",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_textdata",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesCount": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-14T14:19:20Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_textdata')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/6_Complete_csv_process')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata outputcsv",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_outputcsv_bin",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata outputcsv",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FilesCount",
+							"value": {
+								"value": "@greater(length(activity('Get Metadata outputcsv').output.childItems),0)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Set variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Copy to receivedcsv",
+									"description": "Copies csv files from output of decode process to receivedcsv for further processing",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"wildcardFileName": "*.csv",
+												"deleteFilesAfterCompletion": true
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"maxConcurrentConnections": 20
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_outputcsv_bin",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_received_bin",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Get CSV filenames",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "If Condition1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_received",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Filter csv files",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Get CSV filenames",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get CSV filenames').output.childItems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endswith(item().name,'.csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Copy to textdata",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter csv files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter csv files').output.Value\n\n",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy to textdata Folder",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"wildcardFileName": {
+													"value": "@item().Name",
+													"type": "Expression"
+												},
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"maxConcurrentConnections": 100
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_received",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_dynamic",
+											"type": "DatasetReference",
+											"parameters": {
+												"foldername": {
+													"value": "@concat(\n'textdata/DEVICE/Device=',\nsubstring(item().Name,0,8),\n'/year=',\nsubstring(item().Name,9,4),\n'/month=',\nsubstring(item().Name,13,2),\n'/day=',\nsubstring(item().Name,15,2)\n\n)",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Load into Parquet",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Copy to textdata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Create Silver Device data_copy1",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "ls_serverless_sql_pool_db_oxemarine_ldw",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": "EXEC silver.usp_load_parquet"
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Remove textdata",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Load into Parquet",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Delete textdata",
+									"description": "Removes Device=8 directory structure files from text data so they are not re-processed",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ds_textdata",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Delete all files from receivedcsv",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Remove textdata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_received_bin",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"wildcardFileName": "*.csv",
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesCount": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-17T19:03:53Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_outputcsv_bin')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_received')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_dynamic')]",
+				"[concat(variables('workspaceId'), '/linkedServices/ls_serverless_sql_pool_db_oxemarine_ldw')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_textdata')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/7_Process_run')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata receivedcsv",
+						"description": "See if there is already process running",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_received_bin",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "BinaryReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata receivedcsv",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FilesCount",
+							"value": {
+								"value": "@greater(length(activity('Get Metadata receivedcsv').output.childItems),0)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "See if previous process is running",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Set variable1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@variables('FilesCount')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Run Process",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "6_Complete_csv_process",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesCount": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-17T19:04:56Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]",
+				"[concat(variables('workspaceId'), '/pipelines/6_Complete_csv_process')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/99_process_incomming_csvfiles')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Move csv to received",
+						"description": "Move from decoded outputcsv to receivedcsv",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1_move_outputcsv",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Disperse csv to textdata",
+						"description": "Uses file name to place csv in partitioned directory structure in textdata",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Move csv to received",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2_disperse_csv",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Convert to parquet",
+						"description": "reads in text files and converts it to parquet retaining partition directory structure",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Disperse csv to textdata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "4_create_parquet",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Remove textdata",
+						"description": "Removes all items in textdata to prevent re-processing of duplicate data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Convert to parquet",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "5_post_process_textdata",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FilesTocopy": {
+						"type": "Boolean",
+						"defaultValue": false
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-14T14:19:26Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/1_move_outputcsv')]",
+				"[concat(variables('workspaceId'), '/pipelines/2_disperse_csv')]",
+				"[concat(variables('workspaceId'), '/pipelines/4_create_parquet')]",
+				"[concat(variables('workspaceId'), '/pipelines/5_post_process_textdata')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/BinaryDataDestination')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "It describes the destination store.",
+				"linkedServiceName": {
+					"referenceName": "ls_mdftoprocess",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "String"
+					},
+					"Directory": {
+						"type": "String"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@{dataset().Directory}",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@{dataset().Container}",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_mdftoprocess')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/BinaryDataSource_File')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "It describes the file in the data source store.",
+				"linkedServiceName": {
+					"referenceName": "ls_canedge_1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "String"
+					},
+					"Directory": {
+						"type": "String"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@{dataset().Directory}",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@{dataset().Container}",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_canedge_1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/BinaryDataSource_Folder')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "It describes the folder in the data source store.",
+				"linkedServiceName": {
+					"referenceName": "ls_canedge_1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "String"
+					},
+					"Directory": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@{dataset().Directory}",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@{dataset().Container}",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_canedge_1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_archive')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_base2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "mdfstore"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_canedge')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_canedge",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "*.MF4",
+						"container": "canedge"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_canedge')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_canedge_files')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_canedge",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "canedge"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_canedge')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_canedge_test')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_canedge_test",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "canedge"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_canedge_test')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_csvstore')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_csvstore",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "csvstore"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_csvstore')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_dynamic')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_fsoxe",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"foldername": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().foldername",
+							"type": "Expression"
+						},
+						"fileSystem": "fs-oxe"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_fsoxe')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_mdftoprocess')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_base2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "mdftoprocess"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_output_csv_files')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_output_csv_files",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "*.csv",
+						"fileSystem": "outputcsv"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_output_csv_files')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_outputcsv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_stdetoxmarine",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "outputcsv"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_stdetoxmarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_outputcsv_bin')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_outputcsv",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "outputcsv"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_outputcsv')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_received')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_base2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "receivedcsv"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_received_bin')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_stdetoxmarine",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "receivedcsv"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_stdetoxmarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_received_bin_item')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_stdetoxmarine",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "@",
+						"fileSystem": "receivedcsv"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_stdetoxmarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_text_data_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_fsoxe",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "*.csv",
+						"folderPath": "textdata",
+						"fileSystem": "fs-oxe"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_fsoxe')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_textdata')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_fsoxe_sub",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "textdata/DEVICE",
+						"fileSystem": "fs-oxe"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_fsoxe_sub')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_base2')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_base2_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_base2_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_canedge')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_canedge_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_canedge_1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_canedge_1_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_canedge_test')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_canedge_test_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_canedge_test_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_csvstore')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_csvstore_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_csvstore_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_fsoxe')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_fsoxe_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_fsoxe_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_fsoxe_sub')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_fsoxe_sub_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_fsoxe_sub_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_ldw')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_ldw_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_mdftoprocess')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_mdftoprocess_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_output_csv_files')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_output_csv_files_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_outputcsv')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_outputcsv_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_outputcsv_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_serverless_sql_pool_db_oxemarine_ldw')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_serverless_sql_pool_db_oxemarine_ldw_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_stdetoxmarine')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_stdetoxmarine_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_stdetoxmarine_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-OxeMarine",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/IR-OxeMarine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sywsoxemarine-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('sywsoxemarine-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sywsoxemarine-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('sywsoxemarine-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/NewCSV')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/outputcsv/blobs/",
+					"blobPathEndsWith": "csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('NewCSV_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/csv_trigger_minute')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "Processes any output csv files that have been processed in outputcsv",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "7_Process_run",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 60,
+						"startTime": "2023-02-15T11:09:00",
+						"timeZone": "South Africa Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/7_Process_run')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/mdf4_trigger_minute')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "0_copy_from_canedge",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 30,
+						"startTime": "2023-02-07T08:33:00",
+						"timeZone": "South Africa Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/0_copy_from_canedge')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/trigger_mf4_arrives')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/canedge/blobs/",
+					"blobPathEndsWith": ".MF4",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('trigger_mf4_arrives_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/IR-OxeMarine')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "North Europe",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false
+						},
+						"pipelineExternalComputeScaleProperties": {
+							"timeToLive": 60
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/10_import csv to Parquet')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n-- TYPE 'table' is not supported.\n\nCREATE TABLE #device_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #device_ymd EXEC silver.usp_get_device_ymd\n\nselect * from #device_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #device_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #device_ymd where PKid=@w\n\n        EXEC silver.usp_silver_device @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\n/*\nselect * from silver.vw_device\nwhere device='50B8FE41' and year=2022 and month=11 and day=07\norder by timestamp\n*/",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/12_create_FeulRate_view')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "\nuse oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_FuelRate\nGO\n-- create view for device views\nCREATE VIEW silver.vw_FuelRate\nAS\n\nSELECT\n\t[timestamp]\n\t,[Date]\t\t\t\t= convert(date,[timestamp])\n\t,[Time]\t\t\t\t\t= convert(time,timestamp)\n\t--,[TimeStamp]\t\t\t= cast(convert(date,left([timestamp],10)) as datetime) + cast(convert(time,left(right([timestamp],16),8)) as datetime)\n\t,[Year]\t\t\t\t\t= datepart(year,timestamp)\n\t,[Month]\t\t\t\t= datepart(month,timestamp)\n\t,[Day]\t\t\t\t\t= datepart(day,timestamp) \n\t,[Hour]\t\t\t\t\t= datepart(hour,timestamp)\n\t,[Minute]\t\t\t\t= datepart(minute,timestamp) \n\t,[Second]\t\t\t\t= datepart(second,timestamp)\n\t,[GallonPerHour]\t\t= isnull([FuelRateAverage],0) * 264.17205234375 --https://www.xconvert.com/unit-converter/cubic-meters-per-hour-to-gallons-per-hour\n\t,[TotalGallons]\t\t\t= ((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5 --Get per second, and only have data every 5th second\n\t,[DolloarGallons]\t\t= (((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 4.5 --https://www.eia.gov/petroleum/gasdiesel/\n\t,[Co2Kg]\t\t\t\t= (isnull([FuelRateAverage],0) * 264.17205234375) * 10.19 --https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references\n\t,[PetrolGallonPerHour]\t= (isnull([FuelRateAverage],0) * 264.17205234375) * 1.5  --Just quessing, still need info from Oxe\n\t,[TotalPetrolGallons]\t= (((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 1.5 --Get per second, and only have data every 5th second\n\t,[DollarPetrolGallons]\t= (((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 1.5  --[TotalPetrolGallons] * Petrol Price per gallon\n\t,[PetrolCo2Kg]\t\t\t= ((isnull([FuelRateAverage],0) * 264.17205234375) * 1.5) * 8.887 --https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references\n\t,[DollarSavings]\t\t= ((((isnull([FuelRateAverage],0) * 264.17205234375) / 60) * 5) * 1.5) - (((([FuelRateAverage] * 264.17205234375) / 60) * 5) * 4.5)   --[DollarPetrolGallons] - [DolloarGallons]\n\t,[Co2Savings]\t\t\t= (((isnull([FuelRateAverage],0) * 264.17205234375) * 1.5) * 8.887) - (([FuelRateAverage] * 264.17205234375) * 10.19)  --[PetrolCo2Kg] - [Co2Kg]\n\t\n\t,[EngineNumber]\t\t\t=\tEngineInstance\n    , EngineSerialnumber\n    --CASE [EngineSerialnumber]\n\t--WHEN '3000184' THEN 1\n\t--WHEN '3000206' THEN 2\n\t--ELSE 0\n\t--END\n\t\nFROM\n\tsilver.vw_device\nwhere device='D994BF29' --and year=2023 and month=02 and day=12\nAND\n\tEngineInstance > 0\n--order by timestamp\n\n\n-- select * from silver.vw_FuelRate order by timestamp\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": -1
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/1_Create_databases')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use master\nGO\n\nCREATE DATABASE oxemarine_ldw\nGO\n\nALTER DATABASE oxemarine_ldw COLLATE Latin1_General_100_BIN2_UTF8;\nGO\n\nUSE oxemarine_ldw\nGO\nCREATE SCHEMA bronze\nGO\nCREATE SCHEMA silver\nGO\nCREATE SCHEMA gold\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/1_explore_device')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Discovery"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n\nExec sp_describe_first_result_set N'\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK ''abfss://fs-oxe-bronze@stoxemarine.dfs.core.windows.net/outputcsv/50B8FE41-20221107-6368FA59.csv'',\n        FORMAT = ''CSV'',\n        PARSER_VERSION = ''2.0'',\n        HEADER_ROW = TRUE\n    ) AS [result] '\n\nSELECT\n    max(len([CAN1.OxeProprietary4.GpcState]))             as len_GpcState,\n    max(len([CAN1.OxeProprietary4.GpcDuty]))              as len_GpcDuty,\n    max(len([CAN1.OxeProprietary4.GpcModuleFaults]))      as len_GpcModuleFaults,\n    \n    max(len([CAN1.OxeProprietary1.ActualClutchSlip]))       as len_ActualClutchSlip,\n    max(len([CAN1.OxeProprietary1.ControlheadPosition]))    as len_ControlheadPosition,\n    max(len([CAN1.OxeProprietary1.PropellerSpeed]))         as len_PropellerSpeed,\n    max(len([CAN1.OxeProprietary1.RequestClutchSlip]))      as len_RequestClutchSlip,\n\n    max(len([CAN1.TemperatureExtendedRange.TemperatueSource]))      as len_TemperatueSource,\n    max(len([CAN1.TemperatureExtendedRange.EngineRoomTemp]))        as len_EngineRoomTemp,\n    max(len([CAN1.TemperatureExtendedRange.ExhaustGasTemp]))        as len_ExhaustGasTemp,\n    max(len([CAN1.TemperatureExtendedRange.IntakeManifoldTemp]))    as len_IntakeManifoldTemp,\n    max(len([CAN1.TemperatureExtendedRange.FuelTemp]))              as len_FuelTemp,\n    max(len([CAN1.TemperatureExtendedRange.EcuTemp]))               as len_EcuTemp,\n    max(len([CAN1.TemperatureExtendedRange.CompressorOutTemp]))     as len_CompressorOutTemp,\n\n    max(len([CAN1.ActualPressure.PressureSource]))                  as len_PressureSource,\n    max(len([CAN1.ActualPressure.AtmosphericPressure]))             as len_AtmosphericPressure,\n    max(len([CAN1.ActualPressure._GearboxOilPressure]))             as len__GearboxOilPressure,\n    max(len([CAN1.ActualPressure._EngineOilPressure]))              as len__EngineOilPressure,\n    max(len([CAN1.ActualPressure.FuelRailPressure]))                as len_FuelRailPressure,\n    \n    --max(len([CAN1.TripParametersEngine.FuelUsed]))                  as len_FuelUsed,\n    --max(len([CAN1.TripParametersEngine.FuelRateAverage]))           as len_FuelRateAverage,\n    --max(len([CAN1.TripParametersEngine._FuelRate]))                 as len__FuelRate,\n\n    max(len([CAN1.TransmissionParametersDynamic.GearboxOilPressure])) as len_GearboxOilPressure,\n    max(len([CAN1.TransmissionParametersDynamic.GearboxGear]))      as len_GearboxGear,\n    max(len([CAN1.TransmissionParametersDynamic.GearboxOilTemp]))   as len_GearboxOilTemp,\n\n    max(len([CAN1.EngineParametersDynamic.EngineOilPressure]))      as len_EngineOilPressure,\n    max(len([CAN1.EngineParametersDynamic.EngineOilTemp]))          as len_EngineOilTemp,\n    max(len([CAN1.EngineParametersDynamic.EngineCoolantTemp]))      as len_EngineCoolantTemp,\n    max(len([CAN1.EngineParametersDynamic.BatteryVoltage]))         as len_BatteryVoltage,\n    max(len([CAN1.EngineParametersDynamic.FuelRate]))               as len_FuelRate,\n    max(len([CAN1.EngineParametersDynamic.TotalEngineHours]))       as len_TotalEngineHours,\n    max(len([CAN1.EngineParametersDynamic.EngineLoad]))             as len_EngineLoad,\n\n    max(len([CAN1.EngineParametersRapid.EngineSpeed]))              as len_EngineSpeed,\n    max(len([CAN1.EngineParametersRapid.BoostPressure]))            as len_BoostPressure,\n    max(len([CAN1.EngineParametersRapid.PttTrim]))                  as len_PttTrim,\n    \n    max(len([CAN1.ProductInformation.EngineModel]))                 as len_EngineModel,\n    max(len([CAN1.ProductInformation.EngineSwVersion]))             as len_EngineSwVersion,\n    max(len([CAN1.ProductInformation.EngineFwVersion]))             as len_EngineFwVersion,\n    max(len([CAN1.ProductInformation.EngineSerialnumber]))          as len_EngineSerialnumber,\n    \n    max(len([CAN1._PositionRapidUpdate._Latitude]))                 as len__Latitude,\n    max(len([CAN1._PositionRapidUpdate._Longitude]))                as len__Longitude,\n\n    max(len([CAN1.ActuatorCommand.GearCommand]))                    as len_GearCommand,\n    max(len([CAN1.ActuatorCommand.ThrottleCommand]))                as len_ThrottleCommand,\n    \n    max(len([CAN1._CogSogRapidUpdate._SpeedOverGround]))            as len__SpeedOverGround,\n\n    max(len([CAN1.PositionRapidUpdate.Latitude]))                   as len_Latitude,\n    max(len([CAN1.PositionRapidUpdate.Longitude]))                  as len_Longitude,\n\n    max(len([CAN1.CogSogRapidUpdate.CourseOverGround]))             as len_CourseOverGround,\n    max(len([CAN1.CogSogRapidUpdate.CourseOverGround_deg]))         as len_CourseOverGround_deg,\n    max(len([CAN1.CogSogRapidUpdate.SpeedOverGround]))              as len_SpeedOverGround,\n    max(len([CAN1.CogSogRapidUpdate.SpeedOverGround_kn]))           as len_SpeedOverGround_kn,\n\n    max(len([CAN1.PcmFeedback.PortCylinderPosition]))               as len_PortCylinderPosition,\n    max(len([CAN1.PcmFeedback.StbdCylinderPosition]))               as len_StbdCylinderPosition\n\nFROM    OPENROWSET(\n        BULK 'https://stoxemarine.dfs.core.windows.net/fs-oxe-bronze/outputcsv/50B8FE41-20221104-636515D3.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    ) AS [result]\n\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://stoxemarine.dfs.core.windows.net/fs-oxe-bronze/outputcsv/50B8FE41-20221104-636515D3.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamps datetime2(0),\n        [CAN1.OxeProprietary1.ActualClutchSlip] SMALLINT,\n        [CAN1.OxeProprietary1.ControlheadPosition] SMALLINT,\n        [CAN1.OxeProprietary1.PropellerSpeed] FLOAT,\n        [CAN1.OxeProprietary1.RequestClutchSlip] SMALLINT,\n\n        [CAN1.OxeProprietary4.GpcState] SMALLINT,\n        [CAN1.OxeProprietary4.GpcDuty] FLOAT,\n        [CAN1.OxeProprietary4.GpcModuleFaults] SMALLINT,\n\n        [CAN1.EngineParametersRapid.EngineSpeed] FLOAT,\n        [CAN1.EngineParametersRapid.BoostPressure] FLOAT,\n        [CAN1.EngineParametersRapid.PttTrim] SMALLINT,\n        \n        [CAN1.TransmissionParametersDynamic.GearboxOilPressure] FLOAT,\n        [CAN1.TransmissionParametersDynamic.GearboxGear] SMALLINT,\n        [CAN1.TransmissionParametersDynamic.GearboxOilTemp] FLOAT,\n        \n        [CAN1.ActualPressure.PressureSource] SMALLINT,\n        [CAN1.ActualPressure.AtmosphericPressure] FLOAT,\n        [CAN1.ActualPressure._GearboxOilPressure] FLOAT,\n        [CAN1.ActualPressure._EngineOilPressure] FLOAT,\n\t    [CAN1.ActualPressure.FuelRailPressure] FLOAT,\n        \n\t   \n        [CAN1.TemperatureExtendedRange.TemperatueSource] SMALLINT,\n        [CAN1.TemperatureExtendedRange.EngineRoomTemp] FLOAT,\n        [CAN1.TemperatureExtendedRange.ExhaustGasTemp] FLOAT,\n\t    [CAN1.TemperatureExtendedRange.IntakeManifoldTemp] FLOAT,\n        [CAN1.TemperatureExtendedRange.FuelTemp] FLOAT,\n\t    [CAN1.TemperatureExtendedRange.EcuTemp] FLOAT,\n\n        [CAN1.TemperatureExtendedRange.CompressorOutTemp] FLOAT\n    \n    ) AS [result]\n\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://stoxemarine.dfs.core.windows.net/fs-oxe-bronze/outputcsv/50B8FE41-20221104-636515D3.csv',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n        ActualClutchSlip SMALLINT 2,\n        ControlheadPosition SMALLINT 3,\n        PropellerSpeed FLOAT 4,\n        RequestClutchSlip SMALLINT 5,\n        EngineSpeed FLOAT 6,\n        BoostPressure FLOAT 7,\n        PttTrim SMALLINT 8,\n        GearboxOilPressure FLOAT 9,\n        GearboxGear SMALLINT 10,\n        PressureSource SMALLINT 11,\n        AtmosphericPressure FLOAT 12,\n        _GearboxOilPressure FLOAT 13,\n\t    _EngineOilPressure FLOAT 14,\n\t    FuelRailPressure FLOAT 15,\n\t    TemperatueSource SMALLINT 16,\n\t    IntakeManifoldTemp FLOAT 17,\n\t    EcuTemp FLOAT 18\n    \n    ) AS [result]\n\n --create external data source\n CREATE EXTERNAL  DATA SOURCE oxemarine  \nWITH (\n    LOCATION = 'abfss://oxemarine@stsynapsetaxi.dfs.core.windows.net'\n)\n\n\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK '/outputcsv/50B8FE41-20221104-636515D3.csv',\n        DATA_SOURCE = 'oxemarine',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n        ActualClutchSlip SMALLINT 2,\n        ControlheadPosition SMALLINT 3,\n        PropellerSpeed FLOAT 4,\n        RequestClutchSlip SMALLINT 5,\n        EngineSpeed FLOAT 6,\n        BoostPressure FLOAT 7,\n        PttTrim SMALLINT 8,\n        GearboxOilPressure FLOAT 9,\n        GearboxGear SMALLINT 10,\n        PressureSource SMALLINT 11,\n        AtmosphericPressure FLOAT 12,\n        _GearboxOilPressure FLOAT 13,\n\t    _EngineOilPressure FLOAT 14,\n\t    FuelRailPressure FLOAT 15,\n\t    TemperatueSource SMALLINT 16,\n\t    IntakeManifoldTemp FLOAT 17,\n\t    EcuTemp FLOAT 18\n    \n    ) AS [result]\n\nSELECT name, location from sys.external_data_sources\n\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK '/outputcsv/',\n        DATA_SOURCE = 'oxemarine',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n        ActualClutchSlip SMALLINT 2,\n        ControlheadPosition SMALLINT 3,\n        PropellerSpeed FLOAT 4,\n        RequestClutchSlip SMALLINT 5,\n\n        GpcState SMALLINT 6,\n        GpcDuty FLOAT 7,\n        GpcModuleFaults SMALLINT 8,\n\n        EngineSpeed FLOAT 9,\n        BoostPressure FLOAT 10,\n        PttTrim SMALLINT 11,\n        \n        GearboxOilPressure FLOAT 12,\n        GearboxGear SMALLINT 13,\n        GearboxOilTemp FLOAT 14,\n        \n        PressureSource SMALLINT 15,\n        AtmosphericPressure FLOAT 16,\n        _GearboxOilPressure FLOAT 17,\n        _EngineOilPressure FLOAT 18,\n\t    FuelRailPressure FLOAT 19,\n        \t   \n        TemperatueSource SMALLINT 20,\n        EngineRoomTemp FLOAT 21,\n        ExhaustGasTemp FLOAT 22,\n\t    IntakeManifoldTemp FLOAT 23,\n        FuelTemp FLOAT 24,\n\t    EcuTemp FLOAT 25,\n\n        CompressorOutTemp FLOAT 26\n    \n    ) AS [result]\n\nSELECT\n    dev.filename() as filename,\n    count(1) as recordCount\nFROM\n    OPENROWSET(\n        BULK '/textdata/DEVICE/DEVICE=*/year=*/month=*/day=*/*.csv',\n        DATA_SOURCE = 'oxemarine',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n        ActualClutchSlip SMALLINT 2,\n        ControlheadPosition SMALLINT 3,\n        PropellerSpeed FLOAT 4,\n        RequestClutchSlip SMALLINT 5,\n\n        GpcState SMALLINT 6,\n        GpcDuty FLOAT 7,\n        GpcModuleFaults SMALLINT 8,\n\n        EngineSpeed FLOAT 9,\n        BoostPressure FLOAT 10,\n        PttTrim SMALLINT 11,\n        \n        GearboxOilPressure FLOAT 12,\n        GearboxGear SMALLINT 13,\n        GearboxOilTemp FLOAT 14,\n        \n        PressureSource SMALLINT 15,\n        AtmosphericPressure FLOAT 16,\n        _GearboxOilPressure FLOAT 17,\n        _EngineOilPressure FLOAT 18,\n\t    FuelRailPressure FLOAT 19,\n        \t   \n        TemperatueSource SMALLINT 20,\n        EngineRoomTemp FLOAT 21,\n        ExhaustGasTemp FLOAT 22,\n\t    IntakeManifoldTemp FLOAT 23,\n        FuelTemp FLOAT 24,\n\t    EcuTemp FLOAT 25,\n\n        CompressorOutTemp FLOAT 26\n    \n    ) AS [dev]\n    group by dev.filename()\n    order by dev.filename()\n\n\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    count(1) as recordCount\nFROM\n    OPENROWSET(\n        BULK '/textdata/DEVICE/DEVICE=*/year=*/month=*/day=*/*.csv',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n        ActualClutchSlip SMALLINT 2,\n        ControlheadPosition SMALLINT 3,\n        PropellerSpeed FLOAT 4,\n        RequestClutchSlip SMALLINT 5,\n        EngineSpeed FLOAT 6,\n        BoostPressure FLOAT 7,\n        PttTrim SMALLINT 8,\n        GearboxOilPressure FLOAT 9,\n        GearboxGear SMALLINT 10,\n        PressureSource SMALLINT 11,\n        AtmosphericPressure FLOAT 12,\n        _GearboxOilPressure FLOAT 13,\n\t    _EngineOilPressure FLOAT 14,\n\t    FuelRailPressure FLOAT 15,\n\t    TemperatueSource SMALLINT 16,\n\t    IntakeManifoldTemp FLOAT 17,\n\t    EcuTemp FLOAT 18\n    \n    ) AS [dev]\n    group by dev.filepath(1) ,dev.filepath(2), dev.filepath(3), dev.filepath(4) \n    order by dev.filepath(1) ,dev.filepath(2), dev.filepath(3), dev.filepath(4) \n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/1_usp_silver_device')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw/USP"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n\nCREATE OR ALTER PROCEDURE silver.usp_silver_device\n@device varchar(10),\n@year varchar(4),\n@month varchar(2),\n@day varchar(2)\nAS\nBEGIN\n    DECLARE @create_sql_stmt nvarchar(max),\n            @drop_sql_stmt   nvarchar(max),\n            @UniqueNumber    varchar(20) = (select cast(CONVERT (TIME, SYSDATETIME()) as varchar(20)))\n\n            set @UniqueNumber = replace(replace(@UniqueNumber,':','_'),'.','_')\n\n    set @create_sql_stmt =\n        'CREATE EXTERNAL TABLE silver.device_' + @device + '_' + @year + '_' + @month + '_' + @day + '_' + @UniqueNumber +\n        ' WITH\n            (\n                DATA_SOURCE = oxemarine_src,\n                LOCATION = ''silver/DEVICE/Device=' + @device + '/year=' + @year + '/month=' + @month + '/day=' + @day + '/' + @UniqueNumber + ''',\n                FILE_FORMAT = parquet_file_format\n            )\n        AS\n        \n        \n        SELECT\n    device,\n    year,\n    month,\n    day,\n    [timestamp]\n--ActualPressure\n      ,[PressureSource]\n      ,[AtmosphericPressure]\n      ,[FuelRailPressure]\n--ActuatorCommand\n      ,[GearCommand]      \n      ,[ThrottleCommand]  \n--CogSogRapidUpdate      \n      ,[CourseOverGround]   \n      ,[CourseOverGround_deg] \n      ,[SpeedOverGround]    \n      ,[SpeedOverGround_kn]\n--EngineParametersDynamic      \n      ,[EngineInstance]     = case when [EngineOilPressure0] is not null then 1\n                                   when [EngineOilPressure1] is not null then 2\n                                   when [EngineOilPressure2] is not null then 3\n                                   when [EngineOilPressure3] is not null then 4\n                              else null\n                              end\n      ,[EngineOilPressure]  = case when [EngineOilPressure0] is not null then [EngineOilPressure0]\n                                   when [EngineOilPressure1] is not null then [EngineOilPressure1]\n                                   when [EngineOilPressure2] is not null then [EngineOilPressure2]\n                                   when [EngineOilPressure3] is not null then [EngineOilPressure3]\n                              else null\n                              end\n      ,[EngineOilTemp]     \n      ,[EngineCoolantTemp] \n      ,[BatteryVoltage]    \n      ,[FuelRate]          \n      ,[TotalEngineHours]   \n      ,[EngineLoad]         \n--EngineParametersRapid\n      ,[EngineSpeed]\n      ,[BoostPressure]\n      ,[PttTrim]\n--OxeProprietary1 \n      ,[ActualClutchSlip]\n      ,[ControlheadPosition]\n      ,[PropellerSpeed]\n      ,[RequestClutchSlip]\n--OxeProprietary4\n      ,[GpcState]\n      ,[GpcDuty]\n      ,[GpcModuleFaults]\n--PcmFeedback\n      ,[PortCylinderPosition]\n      ,[StbdCylinderPosition]\n--PositionRapidUpdate\n      ,[Latitude]       \n      ,[Longitude]     \n--ProductInformation     \n      ,[EngineModel]     =  case   when [EngineOilPressure0] is not null then ''OXE300''\n                                   when [EngineOilPressure1] is not null then ''OXE300''\n                                   when [EngineOilPressure2] is not null then ''OXE300''\n                                   when [EngineOilPressure3] is not null then ''OXE300''\n                              else ''OXE PV780''\n                              end\n      ,[EngineSwVersion]  = case   when [EngineOilPressure0] is not null then ''SWFL-000029B8-023.013.000''\n                                   when [EngineOilPressure1] is not null then ''SWFL-000029B8-023.013.000''\n                                   when [EngineOilPressure2] is not null then ''SWFL-000029B8-023.013.000''\n                                   when [EngineOilPressure3] is not null then ''SWFL-000029B8-023.013.000''\n                              else ''02.09.23019''\n                              end  \n      ,[EngineFwVersion] = case    when [EngineOilPressure0] is not null then ''30022124-0050001-22132''\n                                   when [EngineOilPressure1] is not null then ''30022124-0050001-22132''\n                                   when [EngineOilPressure2] is not null then ''30022124-0050001-22132''\n                                   when [EngineOilPressure3] is not null then ''30022124-0050001-22132''\n                              else ''02.09.23019''\n                              end\n      ,[EngineSerialnumber] = case when [EngineOilPressure0] is not null then ''3000206''\n                                   when [EngineOilPressure1] is not null then ''3000184''\n                                   when [EngineOilPressure2] is not null then ''3000206''\n                                   when [EngineOilPressure3] is not null then ''3000206''\n                              else ''27''\n                              end\n--TemperatureExtendedRange\n      ,[TemperatureSource]\n      ,[EngineRoomTemp]\n      ,[ExhaustGasTemp]\n      ,[IntakeManifoldTemp]\n      ,[FuelTemp]\n      ,[EcuTemp]\n      ,[CompressorOutTemp]\n--TransmissionParametersDynamic\n      ,[GearboxOilPressure]\n      ,[GearboxGear]\n      ,[GearboxOilTemp]\n--TripParametersEngine    \n      ,[FuelUsed]          \n      ,[FuelRateAverage]    \n\n        FROM bronze.vw_device\n        WHERE   device = ''' + @device + '''\n            AND year   = ''' + @year   + '''\n            AND month  = ''' + @month  + '''\n            AND day    = ''' + @day    + '''' ;\n\n    --print(@create_sql_stmt)\n    EXEC sp_executesql @create_sql_stmt\n\n    SET @drop_sql_stmt =\n        'DROP EXTERNAL TABLE silver.device_' + @device + '_' + @year + '_' + @month + '_' + @day  + '_' + @UniqueNumber;\n\n    --print(@drop_sql_stmt)\n    EXEC sp_executesql @drop_sql_stmt\n\n\nEND;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2_create_external_data_sources')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nif not exists (select * from sys.external_data_sources where name='oxemarine_src')\n    CREATE EXTERNAL DATA SOURCE oxemarine_src\n    WITH (\n        LOCATION    = 'https://stdetoxemarine.dfs.core.windows.net/fs-oxe'\n        --LOCATION    = 'https://stoxemarine.blob.core.windows.net/fs-oxe-bronze'\n    )\n    ;\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/2_get_device_ymd')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw/USP"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_get_device_ymd\nAS\nBEGIN\n    select ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS PKid,\n            device,year,month,day \n    from bronze.vw_device\n    group by device,year,month,day\n    order by 1,2,3,4\n\nEND;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/3_Create_External_file_formats')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nif not exists (select * from sys.external_file_formats where name='csv_file_format')\n--Create an external file format for DELIMITED TEXT files\n    CREATE EXTERNAL FILE FORMAT csv_file_format  \n    WITH (  \n        FORMAT_TYPE = DELIMITEDTEXT  \n        , FORMAT_OPTIONS ( FIELD_TERMINATOR = ','  \n        , STRING_DELIMITER = '\"'\n        , FIRST_ROW = 2\n        , USE_TYPE_DEFAULT =  FALSE\n        , ENCODING = 'UTF8'\n        , PARSER_VERSION = '2.0' )   \n        )\n    ;  \n\nif not exists (select * from sys.external_file_formats where name='csv_file_format_pv1')\n--Create an external file format for DELIMITED TEXT files\n    CREATE EXTERNAL FILE FORMAT csv_file_format_pv1\n    WITH (  \n        FORMAT_TYPE = DELIMITEDTEXT  \n        , FORMAT_OPTIONS ( FIELD_TERMINATOR = ','  \n        , STRING_DELIMITER = '\"'\n        , FIRST_ROW = 2\n        , USE_TYPE_DEFAULT =  FALSE\n        , ENCODING = 'UTF8'\n        , PARSER_VERSION = '1.0' )   \n        )\n    ; \n\nif not exists (select * from sys.external_file_formats where name='parquet_file_format')\nCREATE EXTERNAL FILE FORMAT parquet_file_format\n    WITH (  \n        FORMAT_TYPE = PARQUET\n        , DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n    );\n\nif not exists (select * from sys.external_file_formats where name='parquet_file_format_gz')\nCREATE EXTERNAL FILE FORMAT parquet_file_format_gz\n    WITH (  \n        FORMAT_TYPE = PARQUET\n        , DATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec'\n    );\n\n  if not exists (select * from sys.external_file_formats where name='delta_file_format')\nCREATE EXTERNAL FILE FORMAT delta_file_format\n    WITH (  \n        FORMAT_TYPE = DELTA\n        , DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n    );\n    ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/3_load_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw/USP"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_load_parquet\nAS\nBEGIN\n\nCREATE TABLE #device_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #device_ymd EXEC silver.usp_get_device_ymd\n\nselect * from #device_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #device_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #device_ymd where PKid=@w\n\n        EXEC silver.usp_silver_device @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\nEND\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/4_create_bronze_tables')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('bronze.dbc_lookup') IS NOT NULL DROP EXTERNAL TABLE bronze.dbc_lookup\n\nCREATE EXTERNAL TABLE bronze.dbc_lookup\n    ( PKid              int,\n      [LookupColName]   varchar(20),\n      [LookupRefNo]     varchar(10),\n      [LU_Key]          int,\n      [LU_Value]        varchar(50) )  \n    WITH (\n        LOCATION = 'fs-dbc/DBC_Lookup.csv',  \n        DATA_SOURCE = oxemarine_src,  \n        FILE_FORMAT = csv_file_format_pv1,\n        REJECT_VALUE = 1,\n        REJECTED_ROW_LOCATION = 'rejections/dbc_lookup'\n    )\n;\n--DROP EXTERNAL TABLE bronze.dbc_lookup\n\n--select * from bronze.dbc_lookup\n\n\nif object_id('bronze.calendar') IS NOT NULL DROP EXTERNAL TABLE bronze.calendar\n\nCREATE EXTERNAL TABLE bronze.calendar\n    ( date_key           int ,\n        [Date]           Date ,\n        [year]           SMALLINT ,\n        [month]          TINYINT ,\n        [day]            TINYINT ,\n        [day_name]       varchar(10) ,\n        day_of_year      SMALLINT ,\n        week_of_month    TINYINT ,\n        week_of_year     TINYINT ,\n        month_name       varchar(10) ,\n        year_month       int ,\n        year_week        int  )  \n    WITH (\n        LOCATION = 'fs-dbc/calendar.csv',  \n        DATA_SOURCE = oxemarine_src,  \n        FILE_FORMAT = csv_file_format_pv1,\n        REJECT_VALUE = 1,\n        REJECTED_ROW_LOCATION = 'rejections/calendar'\n    )\n;\n--select * from bronze.calendar\n\n/* skip csv creation\nif object_id('bronze.device') IS NOT NULL DROP EXTERNAL TABLE bronze.device\n\nCREATE EXTERNAL TABLE bronze.device\n    ( timestamp             datetime2(0) ,\n        ActualClutchSlip    SMALLINT ,\n        ControlheadPosition SMALLINT ,\n        PropellerSpeed      FLOAT ,\n        RequestClutchSlip   SMALLINT ,\n        EngineSpeed         FLOAT ,\n        BoostPressure       FLOAT ,\n        PttTrim             SMALLINT ,\n        GearboxOilPressure  FLOAT ,\n        GearboxGear         SMALLINT ,\n        PressureSource      SMALLINT ,\n        AtmosphericPressure FLOAT ,\n        _GearboxOilPressure FLOAT ,\n\t      _EngineOilPressure  FLOAT ,\n\t      FuelRailPressure    FLOAT ,\n\t      TemperatueSource    SMALLINT ,\n\t      IntakeManifoldTemp  FLOAT ,\n\t      EcuTemp             FLOAT   )  \n    WITH (\n        LOCATION = '/raw/**',  \n        DATA_SOURCE = oxemarine_src,  \n        FILE_FORMAT = csv_file_format,\n\n    )\n\n;\nselect top 1000 * from bronze.device\n*/\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/5_create_bronze_views')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS bronze.vw_device\nGO\nCREATE VIEW bronze.vw_device\nAS\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    dev.[timestamp]\n--ActualPressure\n      ,dev.[PressureSource]\n      ,dev.[AtmosphericPressure]\n      ,dev.[FuelRailPressure]\n--ActuatorCommand\n      ,dev.[GearCommand]      \n      ,dev.[ThrottleCommand]  \n--CogSogRapidUpdate      \n      ,dev.[CourseOverGround]   \n      ,dev.[CourseOverGround_deg] \n      ,dev.[SpeedOverGround]    \n      ,dev.[SpeedOverGround_kn]\n--EngineParametersDynamic      \n      ,dev.[EngineOilPressure0]  \n      ,dev.[EngineOilTemp]     \n      ,dev.[EngineCoolantTemp] \n      ,dev.[BatteryVoltage]    \n      ,dev.[FuelRate]          \n      ,dev.[TotalEngineHours]   \n      ,dev.[EngineLoad]         \n      ,dev.[EngineOilPressure1]  \n      ,dev.[EngineOilPressure2]  \n      ,dev.[EngineOilPressure3] \n--EngineParametersRapid\n      ,dev.[EngineSpeed]\n      ,dev.[BoostPressure]\n      ,dev.[PttTrim]\n--OxeProprietary1 \n      ,dev.[ActualClutchSlip]\n      ,dev.[ControlheadPosition]\n      ,dev.[PropellerSpeed]\n      ,dev.[RequestClutchSlip]\n--OxeProprietary4\n      ,dev.[GpcState]\n      ,dev.[GpcDuty]\n      ,dev.[GpcModuleFaults]\n--PcmFeedback\n      ,dev.[PortCylinderPosition]\n      ,dev.[StbdCylinderPosition]\n--PositionRapidUpdate\n      ,dev.[Latitude] \n      ,dev.[Longitude]\n--ProductInformation     \n      ,[EngineModel]        = replace(replace(replace(dev.[EngineModel],'\\x00',''),CHAR(0),''),CHAR(1),'')\n      ,[EngineSwVersion]    = replace(replace(replace(dev.[EngineSwVersion],'\\x00',''),CHAR(0),''),CHAR(1),'')  \n      ,[EngineFwVersion]    = replace(replace(replace(dev.[EngineFwVersion],'\\x00',''),CHAR(0),''),CHAR(1),'')      \n      ,[EngineSerialnumber] = replace(replace(replace(dev.[EngineSerialnumber],'\\x00',''),CHAR(0),''),CHAR(1),'')\n--TemperatureExtendedRange\n      ,dev.[TemperatureSource]\n      ,dev.[EngineRoomTemp]\n      ,dev.[ExhaustGasTemp]\n      ,dev.[IntakeManifoldTemp]\n      ,dev.[FuelTemp]\n      ,dev.[EcuTemp]\n      ,dev.[CompressorOutTemp]\n--TransmissionParametersDynamic\n      ,dev.[GearboxOilPressure]\n      ,dev.[GearboxGear]\n      ,dev.[GearboxOilTemp]\n--TripParametersEngine    \n      ,dev.[FuelUsed]          \n      ,dev.[FuelRateAverage]    \n         \n \nFROM\n    OPENROWSET(\n        BULK '/textdata/DEVICE/Device=*/year=*/month=*/day=*/*.csv',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n--ActualPressure        \n        PressureSource float 2,\n        AtmosphericPressure FLOAT 3,\n        FuelRailPressure FLOAT 4,\n--ActuatorCommand\n      GearCommand  float 5, \n      ThrottleCommand float 6, \n--CogSogRapidUpdate      \n      CourseOverGround  float 7,\n      CourseOverGround_deg float 8,   \n      SpeedOverGround float 9,\n      SpeedOverGround_kn float 10,\n--EngineParametersDynamic      \n      EngineOilPressure0 float 11,\n      EngineOilTemp float 12,\n      EngineCoolantTemp float 13,\n      BatteryVoltage float 14,\n      FuelRate float 15,\n      TotalEngineHours FLOAT 16,\n      EngineLoad FLOAT 17,  \n      EngineOilPressure1 float 18,\n      EngineOilPressure2 float 19,\n      EngineOilPressure3 float 20,\n   \n--EngineParametersRapid\n      EngineSpeed float 21,\n      BoostPressure float 22,\n      PttTrim float 23,\n--OxeProprietary1 \n      ActualClutchSlip float 24,\n      ControlheadPosition float 25,\n      PropellerSpeed float 26,\n      RequestClutchSlip float 27,\n--OxeProprietary4\n      GpcState float 28,\n      GpcDuty float 29,\n      GpcModuleFaults float 30,\n--PcmFeedback\n      PortCylinderPosition float 31,   \n      StbdCylinderPosition float 32, \n--PositionRapidUpdate\n      Latitude float 33,\n      Longitude float 34,\n--ProductInformation     \n      EngineModel varchar(500)   35,\n      EngineSwVersion varchar(100)   36,\n      EngineFwVersion varchar(100)   37,\n      EngineSerialnumber varchar(100)   38,\n--TemperatureExtendedRange\n      TemperatureSource float 39,\n      EngineRoomTemp FLOAT 40,\n      ExhaustGasTemp FLOAT 41,\n\tIntakeManifoldTemp FLOAT 42,\n      FuelTemp FLOAT 43,\n\tEcuTemp FLOAT 44,\n      CompressorOutTemp FLOAT 45,\n--TransmissionParametersDynamic\n      GearboxOilPressure float 46,\n      GearboxGear float 47,\n      GearboxOilTemp float 48,\n--TripParametersEngine    \n      FuelUsed float 49,\n      FuelRateAverage float 50\n\n    ) AS [dev]\nGO\n\nselect * from bronze.vw_device\nwhere device = '4CC52878'\n            AND year   = '2023'\n            AND month  = '03'\n            AND day    = '01'\n  ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/6_create_silver_dbc_lookup')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.dbc_lookup') IS NOT NULL DROP EXTERNAL TABLE silver.dbc_lookup\nGO\n-- cant delete file here in sql\n\nCREATE EXTERNAL TABLE silver.dbc_lookup\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/dbc_lookup',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.dbc_lookup\nGO\n\nselect * from silver.dbc_lookup\n\n\nselect top 100 \n        a.device\n        , a.year\n        , a.month\n        , a.day\n        , a.GpcState\n        , b.LU_Value\n\nfrom silver.vw_device a \nleft join silver.dbc_lookup b \non a.GpcState = b.LU_Key  AND b.LookupColName='GpcState'\n\nwhere device='D994BF29' and year=2022 and month=12 and day=27\norder by timestamp\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/7_create_silver_calendar')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.calendar') IS NOT NULL DROP EXTERNAL TABLE silver.calendar\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.calendar\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/calendar',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.calendar\n;\n\nselect * from silver.calendar\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/8_create_silver_device')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n/*\nif object_id('silver.device') IS NOT NULL DROP EXTERNAL TABLE silver.device\nGO\n-- cant delete file here in sql\n\nCREATE EXTERNAL TABLE silver.device\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/device',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.vw_device\n;\n\nselect top 1000 * from silver.device\n*/\n\nEXEC silver.usp_silver_device 'D994BF29','2022','12','27'\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/99 Test script')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "exec silver.usp_silver_device '4CC52878','2023', '03', '01'\n\n\nCREATE EXTERNAL TABLE silver.device_4CC52878_2023_03_01_10_07_07_4352716 WITH ( DATA_SOURCE = oxemarine_src, LOCATION = 'silver/DEVICE/Device=4CC52878/year=2023/month=03/day=01/10_07_07_4352716', FILE_FORMAT = parquet_file_format ) AS with getModel as ( select device, EngineInstance, EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber, best_row = row_number() over (Partition by device,EngineInstance, EngineModel order by tot_Len desc) from ( select distinct device, [EngineInstance] = case when [EngineOilPressure0] is not null then 1 when [EngineOilPressure1] is not null then 2 when [EngineOilPressure2] is not null then 3 when [EngineOilPressure3] is not null then 4 else -1 end, EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber, tot_Len = len(EngineSwVersion) + len(EngineFwVersion) + len(EngineSerialnumber) FROM bronze.vw_device WHERE device = '4CC52878' AND year = '2023' AND month = '03' AND day = '01' AND EngineModel is not NULL AND EngineSwVersion is not NULL AND EngineFwVersion is not NULL AND EngineSerialnumber is not null ) a ) SELECT v.device, v.year, v.month, v.day, [timestamp] ,[PressureSource] ,[AtmosphericPressure] ,[FuelRailPressure] ,[GearCommand] ,[ThrottleCommand] ,[CourseOverGround] ,[CourseOverGround_deg] ,[SpeedOverGround] ,[SpeedOverGround_kn] ,[EngineInstance] = g.EngineInstance ,[EngineOilPressure] = case when [EngineOilPressure0] is not null then [EngineOilPressure0] when [EngineOilPressure1] is not null then [EngineOilPressure1] when [EngineOilPressure2] is not null then [EngineOilPressure2] when [EngineOilPressure3] is not null then [EngineOilPressure3] else null end ,[EngineOilTemp] ,[EngineCoolantTemp] ,[BatteryVoltage] ,[FuelRate] ,[TotalEngineHours] ,[EngineLoad] ,[EngineSpeed] ,[BoostPressure] ,[PttTrim] ,[ActualClutchSlip] ,[ControlheadPosition] ,[PropellerSpeed] ,[RequestClutchSlip] ,[GpcState] ,[GpcDuty] ,[GpcModuleFaults] ,[PortCylinderPosition] ,[StbdCylinderPosition] ,[Latitude] ,[Longitude] ,[EngineModel] = ISNULL(g.EngineModel, v.EngineModel) ,[EngineSwVersion] = ISNULL(g.EngineSwVersion, v.EngineSwVersion) ,[EngineFwVersion] = ISNULL(g.EngineFwVersion,v.EngineFwVersion) ,[EngineSerialnumber] = ISNULL(g.EngineSerialnumber, v.EngineSerialnumber) ,[TemperatureSource] ,[EngineRoomTemp] ,[ExhaustGasTemp] ,[IntakeManifoldTemp] ,[FuelTemp] ,[EcuTemp] ,[CompressorOutTemp] ,[GearboxOilPressure] ,[GearboxGear] ,[GearboxOilTemp] ,[FuelUsed] ,[FuelRateAverage] FROM bronze.vw_device v JOIN getModel g ON v.device = g.device AND (case when v.[EngineOilPressure0] is not null then 1 when v.[EngineOilPressure1] is not null then 2 when v.[EngineOilPressure2] is not null then 3 when v.[EngineOilPressure3] is not null then 4 else -1 end) = g.EngineInstance AND v.EngineModel = g.EngineModel WHERE v.device = '4CC52878' AND v.year = '2023' AND v.month = '03' AND v.day = '01'\nDROP EXTERNAL TABLE silver.device_4CC52878_2023_03_01_10_07_07_4352716",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/9_1_create_silver_device_view')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_device\nGO\n-- create view for device views\nCREATE VIEW silver.vw_device\nAS\n    SELECT DISTINCT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    date_key = convert(int, convert(varchar(10), timestamp, 112)) ,\n    dev.*\nFROM\n    OPENROWSET(\n        BULK '/silver/DEVICE/Device=*/year=*/month=*/day=*/*/*.parquet',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'PARQUET'\n    )\n    WITH (\n        timestamp datetime2(0) ,\n--ActualPressure        \n        PressureSource float ,\n        AtmosphericPressure FLOAT ,\n        FuelRailPressure FLOAT ,\n--ActuatorCommand\n      GearCommand  float , \n      ThrottleCommand float , \n--CogSogRapidUpdate      \n      CourseOverGround  float ,\n      CourseOverGround_deg float ,   \n      SpeedOverGround float ,\n      SpeedOverGround_kn float ,\n--EngineParametersDynamic   \n      EngineInstance int,\n      EngineOilPressure float ,\n      EngineOilTemp float ,\n      EngineCoolantTemp float ,\n      BatteryVoltage float ,\n      FuelRate float ,\n      TotalEngineHours FLOAT ,\n      EngineLoad FLOAT ,  \n    \n--EngineParametersRapid\n      EngineSpeed float ,\n      BoostPressure float ,\n      PttTrim float ,\n--OxeProprietary1 \n      ActualClutchSlip float ,\n      ControlheadPosition float ,\n      PropellerSpeed float ,\n      RequestClutchSlip float ,\n--OxeProprietary4\n      GpcState float ,\n      GpcDuty float ,\n      GpcModuleFaults float ,\n--PcmFeedback\n      PortCylinderPosition float ,   \n      StbdCylinderPosition float , \n--PositionRapidUpdate\n      Latitude float ,\n      Longitude float ,\n--ProductInformation     \n      EngineModel varchar(100) ,\n      EngineSwVersion varchar(100) ,\n      EngineFwVersion varchar(100) ,\n      EngineSerialnumber varchar(100) ,\n--TemperatureExtendedRange\n      TemperatureSource float ,\n      EngineRoomTemp FLOAT ,\n      ExhaustGasTemp FLOAT ,\n\tIntakeManifoldTemp FLOAT ,\n      FuelTemp FLOAT ,\n\tEcuTemp FLOAT ,\n      CompressorOutTemp FLOAT ,\n--TransmissionParametersDynamic\n      GearboxOilPressure float ,\n      GearboxGear float ,\n      GearboxOilTemp float ,\n--TripParametersEngine    \n      FuelUsed float ,\n      FuelRateAverage float \n    \n    ) AS [dev]\nGO\n\nselect * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=02 and day=14\nand EngineInstance is not null\norder by timestamp\n\nselect  * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=02 and day=19\norder by timestamp, EngineInstance\n\nselect date_key, day, EngineInstance, Rows=count(1)\nfrom silver.vw_device\nwhere device='D994BF29' and year=2023 and month=02 and day>=16\ngroup by date_key, day, EngineInstance\norder by 1,2,3\n\nselect * from silver.vw_FuelRate\norder by timestamp\n\n\nselect * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=02 and day=16\nand timestamp > '2023-02-16T20:19:00.0000000'\norder by timestamp\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": -1
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/9_2_create_silver_view_oldversion')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_device_old\nGO\n-- create view for device views\nCREATE VIEW silver.vw_device_old\nAS\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    date_key = convert(int, convert(varchar(10), timestamp, 112)) ,\n    dev.*\nFROM\n    OPENROWSET(\n        BULK '/silver/DEVICE/Device=*/year=*/month=*/day=*/*/*.parquet',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'PARQUET'\n    )\n    WITH (\n        timestamp datetime2(0) ,\n--ActualPressure        \n        PressureSource float ,\n        AtmosphericPressure FLOAT ,\n        FuelRailPressure FLOAT ,\n--ActuatorCommand\n      GearCommand  float , \n      ThrottleCommand float , \n--CogSogRapidUpdate      \n      CourseOverGround  float ,\n      CourseOverGround_deg smallint ,   \n      SpeedOverGround float ,\n      SpeedOverGround_kn float ,\n--EngineParametersDynamic   \n      EngineInstance int,\n      EngineOilPressure float ,\n      EngineOilTemp float ,\n      EngineCoolantTemp float ,\n      BatteryVoltage float ,\n      FuelRate float ,\n      TotalEngineHours FLOAT ,\n      EngineLoad FLOAT ,  \n    \n--EngineParametersRapid\n      EngineSpeed float ,\n      BoostPressure float ,\n      PttTrim float ,\n--OxeProprietary1 \n      ActualClutchSlip float ,\n      ControlheadPosition float ,\n      PropellerSpeed float ,\n      RequestClutchSlip float ,\n--OxeProprietary4\n      GpcState float ,\n      GpcDuty float ,\n      GpcModuleFaults float ,\n--PcmFeedback\n      PortCylinderPosition float ,   \n      StbdCylinderPosition float , \n--PositionRapidUpdate\n      Latitude float ,\n      Longitude float ,\n--ProductInformation     \n      EngineModel varchar(100) ,\n      EngineSwVersion varchar(100) ,\n      EngineFwVersion varchar(100) ,\n      EngineSerialnumber varchar(100) ,\n--TemperatureExtendedRange\n      TemperatureSource float ,\n      EngineRoomTemp FLOAT ,\n      ExhaustGasTemp FLOAT ,\n\tIntakeManifoldTemp FLOAT ,\n      FuelTemp FLOAT ,\n\tEcuTemp FLOAT ,\n      CompressorOutTemp FLOAT ,\n--TransmissionParametersDynamic\n      GearboxOilPressure float ,\n      GearboxGear float ,\n      GearboxOilTemp float ,\n--TripParametersEngine    \n      FuelUsed float ,\n      FuelRateAverage float \n    \n    ) AS [dev]\nGO\n\nselect * from silver.vw_device_old\nwhere device='D994BF29' and year=2023 and month=02 and day=15\nand EngineInstance is not null\norder by timestamp\n\nselect * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=02 and day=16\nand SpeedOverGround is not null\norder by timestamp\n\nselect date_key, day, EngineInstance, Rows=count(1)\nfrom silver.vw_device\ngroup by date_key, day, EngineInstance\norder by 1,2,3\n\nselect * from silver.vw_FuelRate\norder by timestamp\n\n\nselect * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=02 and day>=16\nand SpeedOverGround is not null\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/9_create_silver_device_view')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_device\nGO\n-- create view for device views\nCREATE VIEW silver.vw_device\nAS\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    date_key = convert(int, convert(varchar(10), timestamp, 112)) ,\n    dev.*\nFROM\n    OPENROWSET(\n        BULK '/silver/DEVICE/Device=*/year=*/month=*/day=*/*/*.parquet',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'PARQUET'\n    )\n    WITH (\n        timestamp datetime2(0) ,\n        ActualClutchSlip SMALLINT ,\n        ControlheadPosition SMALLINT ,\n        PropellerSpeed FLOAT ,\n        RequestClutchSlip SMALLINT ,\n        EngineSpeed FLOAT ,\n        BoostPressure FLOAT ,\n        PttTrim SMALLINT ,\n        GearboxOilPressure FLOAT ,\n        GearboxGear SMALLINT ,\n        PressureSource SMALLINT ,\n        AtmosphericPressure FLOAT ,\n        _GearboxOilPressure FLOAT ,\n\t    _EngineOilPressure FLOAT ,\n\t    FuelRailPressure FLOAT ,\n\t    TemperatueSource SMALLINT ,\n\t    IntakeManifoldTemp FLOAT ,\n\t    EcuTemp FLOAT \n    \n    ) AS [dev]\nGO\n\nexec sp_refreshview @viewname='silver.vw_device'\n\n\nselect * from silver.vw_device\nwhere device='4CC52878' and year=2023 and month=03 and day=01\norder by timestamp\n\nSELECT * FROM silver.dbc_lookup\nselect * from silver.calendar\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Alternate_1_usp_silver_device')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw/USP"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n/*\nselect device, EngineInstance, EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber,\n                best_row = row_number() over (Partition by device,EngineInstance, EngineModel order by tot_Len desc)\nfrom (\nselect distinct device,\n                [EngineInstance]     = case when [EngineOilPressure0] is not null then 1\n                                   when [EngineOilPressure1] is not null then 2\n                                   when [EngineOilPressure2] is not null then 3\n                                   when [EngineOilPressure3] is not null then 4\n                              else -1\n                              end, \n                EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber,\n                tot_Len = len(EngineSwVersion) + len(EngineFwVersion) + len(EngineSerialnumber)\n\nFROM bronze.vw_device\n        WHERE   device = '4CC52878'\n            AND year   = '2023'\n            AND month  = '03'\n            AND day    = '01'\n            AND EngineModel is not NULL\n            AND EngineSwVersion is not NULL\n            AND EngineFwVersion is not NULL\n            AND EngineSerialnumber is not null\n) a\n*/\n\nCREATE OR ALTER PROCEDURE silver.usp_silver_device\n@device varchar(10),\n@year varchar(4),\n@month varchar(2),\n@day varchar(2)\nAS\nBEGIN\n    DECLARE @create_sql_stmt varchar(max),\n            @drop_sql_stmt   varchar(max),\n            @UniqueNumber    varchar(20) = (select cast(CONVERT (TIME, SYSDATETIME()) as varchar(20)))\n\n            set @UniqueNumber = replace(replace(@UniqueNumber,':','_'),'.','_')\n\n    set @create_sql_stmt =\n        'CREATE EXTERNAL TABLE silver.device_' + @device + '_' + @year + '_' + @month + '_' + @day + '_' + @UniqueNumber +\n        ' WITH\n            (\n                DATA_SOURCE = oxemarine_src,\n                LOCATION = ''silver/DEVICE/Device=' + @device + '/year=' + @year + '/month=' + @month + '/day=' + @day + '/' + @UniqueNumber + ''',\n                FILE_FORMAT = parquet_file_format\n            )\n        AS\n\n       with getModel as (\n             select device, EngineInstance, EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber,\n                best_row = row_number() over (Partition by device,EngineInstance, EngineModel order by tot_Len desc)\n                  from (\n                  select distinct device,\n                              [EngineInstance]     = case when [EngineOilPressure0] is not null then 1\n                                                when [EngineOilPressure1] is not null then 2\n                                                when [EngineOilPressure2] is not null then 3\n                                                when [EngineOilPressure3] is not null then 4\n                                                else -1\n                                                end, \n                              EngineModel,EngineSwVersion, EngineFwVersion, EngineSerialnumber,\n                              tot_Len = len(EngineSwVersion) + len(EngineFwVersion) + len(EngineSerialnumber)\n\n                  FROM bronze.vw_device\n                        WHERE   device = ''' + @device + '''\n                              AND year   = ''' + @year   + '''\n                              AND month  = ''' + @month  + '''\n                              AND day    = ''' + @day    + '''\n                              AND EngineModel is not NULL\n                              AND EngineSwVersion is not NULL\n                              AND EngineFwVersion is not NULL\n                              AND EngineSerialnumber is not null\n                  ) a\n       ) \n        \n        SELECT\n    v.device,\n    v.year,\n    v.month,\n    v.day,\n    [timestamp]\n\n      ,[PressureSource]\n      ,[AtmosphericPressure]\n      ,[FuelRailPressure]\n\n      ,[GearCommand]      \n      ,[ThrottleCommand]  \n     \n      ,[CourseOverGround]   \n      ,[CourseOverGround_deg] \n      ,[SpeedOverGround]    \n      ,[SpeedOverGround_kn]\n      \n      ,[EngineInstance]     =  g.EngineInstance\n      ,[EngineOilPressure]  = case when [EngineOilPressure0] is not null then [EngineOilPressure0]\n                                   when [EngineOilPressure1] is not null then [EngineOilPressure1]\n                                   when [EngineOilPressure2] is not null then [EngineOilPressure2]\n                                   when [EngineOilPressure3] is not null then [EngineOilPressure3]\n                              else null\n                              end\n      ,[EngineOilTemp]     \n      ,[EngineCoolantTemp] \n      ,[BatteryVoltage]    \n      ,[FuelRate]          \n      ,[TotalEngineHours]   \n      ,[EngineLoad]         \n\n      ,[EngineSpeed]\n      ,[BoostPressure]\n      ,[PttTrim]\n \n      ,[ActualClutchSlip]\n      ,[ControlheadPosition]\n      ,[PropellerSpeed]\n      ,[RequestClutchSlip]\n\n      ,[GpcState]\n      ,[GpcDuty]\n      ,[GpcModuleFaults]\n\n      ,[PortCylinderPosition]\n      ,[StbdCylinderPosition]\n\n      ,[Latitude]       \n      ,[Longitude]     \n    \n      ,[EngineModel]        = ISNULL(g.EngineModel, v.EngineModel)\n      ,[EngineSwVersion]    = ISNULL(g.EngineSwVersion, v.EngineSwVersion)\n      ,[EngineFwVersion]    = ISNULL(g.EngineFwVersion,v.EngineFwVersion)\n      ,[EngineSerialnumber] = ISNULL(g.EngineSerialnumber, v.EngineSerialnumber)\n\n      ,[TemperatureSource]\n      ,[EngineRoomTemp]\n      ,[ExhaustGasTemp]\n      ,[IntakeManifoldTemp]\n      ,[FuelTemp]\n      ,[EcuTemp]\n      ,[CompressorOutTemp]\n\n      ,[GearboxOilPressure]\n      ,[GearboxGear]\n      ,[GearboxOilTemp]\n\n      ,[FuelUsed]          \n      ,[FuelRateAverage]    \n\n        FROM bronze.vw_device v\n        JOIN getModel g\n              ON v.device = g.device\n                  AND (case when v.[EngineOilPressure0] is not null then 1\n                            when v.[EngineOilPressure1] is not null then 2\n                            when v.[EngineOilPressure2] is not null then 3\n                            when v.[EngineOilPressure3] is not null then 4\n                            else -1\n                            end) = g.EngineInstance\n                  AND  v.EngineModel = g.EngineModel\n        WHERE   v.device = ''' + @device + '''\n            AND v.year   = ''' + @year   + '''\n            AND v.month  = ''' + @month  + '''\n            AND v.day    = ''' + @day    + ''' \n            AND v.best_row =1 '\n\n    --print(@create_sql_stmt)\n    EXEC sp_executesql @create_sql_stmt\n\n    SET @drop_sql_stmt =\n        'DROP EXTERNAL TABLE silver.device_' + @device + '_' + @year + '_' + @month + '_' + @day  + '_' + @UniqueNumber;\n\n    --print(@drop_sql_stmt)\n    EXEC sp_executesql @drop_sql_stmt\n\n\nEND;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Discovery"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n\n\nExec sp_describe_first_result_set N'\nSELECT\n    top 100 *\nFROM\n    OPENROWSET(\n        BULK ''abfss://fs-oxe-bronze@stoxemarine.dfs.core.windows.net/outputcsv/50B8FE41-20221104-636515D3.csv'',\n        FORMAT = ''CSV'',\n        PARSER_VERSION = ''2.0'',\n        HEADER_ROW = TRUE\n    ) AS [result] '\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'https://stdetoxemarine.dfs.core.windows.net/fs-oxe/silver/DEVICE/Device=D994BF29/year=2022/month=12/day=27/11_19_47_2815249/C848E9F8-063E-4E67-907D-6A4360B1EEE3_17_0-1.parquet',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 3')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT TOP (100) [CompressorOutTemp]\n,[date_key]\n,[TotalEngineHours]\n,[Latitude]\n,[FuelRateAverage]\n,[GearCommand]\n,[EngineSpeed]\n,[EngineSerialnumber]\n,[SpeedOverGround_kn]\n,[PropellerSpeed]\n,[month]\n,[EngineRoomTemp]\n,[EngineOilPressure]\n,[PortCylinderPosition]\n,[IntakeManifoldTemp]\n,[year]\n,[EngineCoolantTemp]\n,[GpcModuleFaults]\n,[GearboxGear]\n,[PressureSource]\n,[FuelRate]\n,[EngineModel]\n,[CourseOverGround]\n,[FuelUsed]\n,[PttTrim]\n,[EngineFwVersion]\n,[SpeedOverGround]\n,[GpcState]\n,[ControlheadPosition]\n,[TemperatureSource]\n,[EngineInstance]\n,[RequestClutchSlip]\n,[EcuTemp]\n,[day]\n,[StbdCylinderPosition]\n,[GearboxOilPressure]\n,[FuelRailPressure]\n,[EngineLoad]\n,[Longitude]\n,[ThrottleCommand]\n,[AtmosphericPressure]\n,[BoostPressure]\n,[EngineSwVersion]\n,[CourseOverGround_deg]\n,[ActualClutchSlip]\n,[ExhaustGasTemp]\n,[device]\n,[EngineOilTemp]\n,[GpcDuty]\n,[timestamp]\n,[FuelTemp]\n,[BatteryVoltage]\n,[GearboxOilTemp]\n FROM [silver].[vw_device]\n ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-custstgacct--sywsoxemarine-stdetoxemarine')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxemarine",
+				"groupId": "dfs",
+				"fqdns": [
+					"stdetoxemarine.dfs.core.windows.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--sywsoxemarine')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Synapse/workspaces/sywsoxemarine",
+				"groupId": "sql",
+				"fqdns": [
+					"sywsoxemarine.75f4cb58-e6c1-4a5b-a708-c7c17422b25f.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sqlOnDemand--sywsoxemarine')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Synapse/workspaces/sywsoxemarine",
+				"groupId": "sqlOnDemand",
+				"fqdns": [
+					"sywsoxemarine-ondemand.75f4cb58-e6c1-4a5b-a708-c7c17422b25f.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		}
+	]
+}
