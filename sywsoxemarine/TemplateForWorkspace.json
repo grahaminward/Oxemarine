@@ -2801,7 +2801,7 @@
 			"properties": {
 				"description": "Processes any output csv files that have been processed in outputcsv",
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -2845,7 +2845,7 @@
 				"typeProperties": {
 					"recurrence": {
 						"frequency": "Minute",
-						"interval": 30,
+						"interval": 20,
 						"startTime": "2023-02-07T08:33:00",
 						"timeZone": "South Africa Standard Time"
 					}
