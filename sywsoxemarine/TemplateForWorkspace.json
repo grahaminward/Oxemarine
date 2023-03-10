@@ -96,14 +96,6 @@
 		"sywsoxemarine-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://stdetoxemarine.dfs.core.windows.net"
-		},
-		"NewCSV_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxemarine"
-		},
-		"trigger_mf4_arrives_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxeraw"
 		}
 	},
 	"variables": {
@@ -2774,27 +2766,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/NewCSV')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/outputcsv/blobs/",
-					"blobPathEndsWith": "csv",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('NewCSV_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/csv_trigger_minute')]",
 			"type": "Microsoft.Synapse/workspaces/triggers",
 			"apiVersion": "2019-06-01-preview",
@@ -2854,27 +2825,6 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/pipelines/0_copy_from_canedge')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/trigger_mf4_arrives')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/canedge/blobs/",
-					"blobPathEndsWith": ".MF4",
-					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('trigger_mf4_arrives_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated"
-					]
-				}
-			},
-			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",

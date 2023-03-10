@@ -70,12 +70,6 @@
 		},
 		"sywsoxemarine-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://stdetoxemarine.dfs.core.windows.net"
-		},
-		"NewCSV_properties_typeProperties_scope": {
-			"value": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxemarine"
-		},
-		"trigger_mf4_arrives_properties_typeProperties_scope": {
-			"value": "/subscriptions/2319573d-4493-489b-840b-3ab6bd38b141/resourceGroups/rg-det-oxe/providers/Microsoft.Storage/storageAccounts/stdetoxeraw"
 		}
 	}
 }
