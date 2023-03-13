@@ -1,0 +1,49 @@
+{
+	"name": "0_copy_mf4_from_canedge",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get MF4 files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"fieldList": []
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get MF4 files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "filesexist",
+					"value": {
+						"value": "@activity('Get MF4 files').output.childItems",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"filesexist": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
