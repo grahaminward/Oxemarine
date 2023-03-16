@@ -2,7 +2,7 @@
 	"name": "mdf4_trigger_minute",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
