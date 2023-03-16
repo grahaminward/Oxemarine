@@ -14,8 +14,8 @@
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 45,
+				"frequency": "Hour",
+				"interval": 2,
 				"startTime": "2023-02-07T08:33:00",
 				"timeZone": "South Africa Standard Time"
 			}
