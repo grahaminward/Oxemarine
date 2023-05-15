@@ -3560,6 +3560,29 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/13_view_current_uploads')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nselect a.device\n        ,b.location\n        ,b.vessel\n        ,a.date_key\n        ,a.metric_count\nFROM (\n    select device   \n            , date_key\n            , count(1) as metric_count\n    FROM\n        silver.vw_device\n    where date_key > 20230501\n    group by device   \n            , date_key\n) a \nLEFT JOIN silver.devicedetail b\n    on a.device = b.serialnumber\n\n    ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
 		}
 	]
 }
