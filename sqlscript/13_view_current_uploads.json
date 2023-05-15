@@ -5,7 +5,7 @@
 			"name": "ldw"
 		},
 		"content": {
-			"query": "use oxemarine_ldw\nGO\n\nselect a.device\n        ,b.location\n        ,b.vessel\n        ,a.date_key\n        ,a.metric_count\nFROM (\n    select device   \n            , date_key\n            , count(1) as metric_count\n    FROM\n        silver.vw_device\n    where date_key > 20230501\n    group by device   \n            , date_key\n) a \nLEFT JOIN silver.devicedetail b\n    on a.device = b.serialnumber\n\n    ",
+			"query": "use oxemarine_ldw\nGO\n\nselect a.device\n        ,b.location\n        ,b.vessel\n        ,a.date_key\n        ,a.metric_count\nFROM (\n    select device   \n            , date_key\n            , count(1) as metric_count\n    FROM\n        silver.vw_device\n    where date_key > 20230501\n    group by device   \n            , date_key\n) a \nLEFT JOIN silver.devicedetail b\n    on a.device = b.serialnumber\nOrder by date_key desc, device\n    ",
 			"metadata": {
 				"language": "sql"
 			},
