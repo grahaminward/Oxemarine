@@ -3217,6 +3217,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/3_load_fclive_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw/USP"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_load_fclive_parquet\nAS\nBEGIN\n\nCREATE TABLE #fclive_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #device_ymd EXEC silver.usp_get_fclive_ymd\n\nselect * from #fclive_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #fclive_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #fclive_ymd where PKid=@w\n\n        EXEC silver.usp_silver_fclive @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\nEND\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/3_load_parquet')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -3387,6 +3410,29 @@
 				},
 				"content": {
 					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.faultcode') IS NOT NULL DROP EXTERNAL TABLE silver.faultcode\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.faultcode\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/faultcode',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.fault_code\n;\n\nselect * from silver.faultcode\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/8_1_create_silver_fclive')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\n/*\nif object_id('silver.device') IS NOT NULL DROP EXTERNAL TABLE silver.device\nGO\n-- cant delete file here in sql\n\nCREATE EXTERNAL TABLE silver.device\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/device',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.vw_device\n;\n\nselect top 1000 * from silver.device\n*/\n\nEXEC silver.usp_silver_fclive '4CC52878','2023', '03', '14'\n\nDROP EXTERNAL TABLE silver.device_4CC52878_2023_03_02_07_23_30_7928134\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
