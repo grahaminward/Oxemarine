@@ -1,0 +1,20 @@
+{
+	"name": "1_usp_silver_fclive",
+	"properties": {
+		"folder": {
+			"name": "ldw/USP"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\n\nCREATE OR ALTER PROCEDURE silver.usp_silver_fclive\n@device varchar(10),\n@year varchar(4),\n@month varchar(2),\n@day varchar(2)\nAS\nBEGIN\n    DECLARE @create_sql_stmt nvarchar(max),\n            @drop_sql_stmt   nvarchar(max),\n            @UniqueNumber    varchar(20) = (select cast(CONVERT (TIME, SYSDATETIME()) as varchar(20)))\n\n            set @UniqueNumber = replace(replace(@UniqueNumber,':','_'),'.','_')\n\n    set @create_sql_stmt =\n        'CREATE EXTERNAL TABLE silver.fclive_' + @device + '_' + @year + '_' + @month + '_' + @day + '_' + @UniqueNumber +\n        ' WITH\n            (\n                DATA_SOURCE = oxemarine_src,\n                LOCATION = ''silver/fclive/Device=' + @device + '/year=' + @year + '/month=' + @month + '/day=' + @day + '/' + @UniqueNumber + ''',\n                FILE_FORMAT = parquet_file_format\n            )\n        AS\n        \n        \n        SELECT\n    device,\n    year,\n    month,\n    day,\n    [timestamp],\n    hexcode,\n    LampStatus,\n    SPN,\n    FMI,\n    enginenumber\n  \n\n        FROM bronze.vw_fclive\n        WHERE   device = ''' + @device + '''\n            AND year   = ''' + @year   + '''\n            AND month  = ''' + @month  + '''\n            AND day    = ''' + @day    + '''' ;\n\n    --print(@create_sql_stmt)\n    EXEC sp_executesql @create_sql_stmt\n\n    SET @drop_sql_stmt =\n        'DROP EXTERNAL TABLE silver.fclive_' + @device + '_' + @year + '_' + @month + '_' + @day  + '_' + @UniqueNumber;\n\n    --print(@drop_sql_stmt)\n    EXEC sp_executesql @drop_sql_stmt\n\n\nEND;",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
