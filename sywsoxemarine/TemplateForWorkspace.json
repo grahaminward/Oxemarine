@@ -3171,6 +3171,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/2_get_fclive_ymd')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw/USP"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_get_fclive_ymd\nAS\nBEGIN\n    select ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS PKid,\n            device,year,month,day \n    from bronze.vw_fclive\n    group by device,year,month,day\n    order by 1,2,3,4\n\nEND;",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/3_Create_External_file_formats')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
