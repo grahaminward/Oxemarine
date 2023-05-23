@@ -3217,6 +3217,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/5_1_create_bronze_fc_live')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS bronze.vw_fc_live\nGO\nCREATE VIEW bronze.vw_fc_live\nAS\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    dev.[timestamp],\n    dev.ID as hexcode,\n    dev.LampStatus,\n    dev.SPN,\n    dev.FMI,\n    enginenumber = cast(dev.SA as int)\n\nFROM\n    OPENROWSET(\n        BULK '/textdata/fc_live/Device=*/year=*/month=*/day=*/*.csv',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'CSV',\n        PARSER_VERSION = '2.0',\n        HEADER_ROW = TRUE\n    )\n    WITH (\n        timestamp datetime2(0) 1,\n        ID varchar(20),\n        LampStatus int,\n        SPN int,\n        FMI int,\n        SA  float\n\n    ) AS [dev]\nGO\n\nselect * from bronze.vw_fc_live\nwhere device = '4CC52878'\n            AND year   = '2023'\n            AND month  = '03'\n            AND day    = '14'\n  ",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/5_create_bronze_views')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
