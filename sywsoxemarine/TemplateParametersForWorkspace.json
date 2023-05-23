@@ -35,6 +35,9 @@
 		"ls_outputcsv_accountKey": {
 			"value": ""
 		},
+		"ls_outputfccsv_accountKey": {
+			"value": ""
+		},
 		"ls_serverless_sql_pool_db_oxemarine_ldw_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sywsoxemarine-ondemand.sql.azuresynapse.net;Initial Catalog=oxemarine_ldw"
 		},
@@ -63,6 +66,9 @@
 			"value": "https://stdetoxemarine.dfs.core.windows.net/"
 		},
 		"ls_outputcsv_properties_typeProperties_url": {
+			"value": "https://stdetoxemarine.dfs.core.windows.net/"
+		},
+		"ls_outputfccsv_properties_typeProperties_url": {
 			"value": "https://stdetoxemarine.dfs.core.windows.net/"
 		},
 		"ls_stdetoxmarine_properties_typeProperties_url": {
