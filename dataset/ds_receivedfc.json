@@ -1,0 +1,21 @@
+{
+	"name": "ds_receivedfc",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_base2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "receivedfcvsc"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
