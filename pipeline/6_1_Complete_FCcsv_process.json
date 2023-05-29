@@ -143,7 +143,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "ds_received",
+						"referenceName": "ds_receivedfc",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
@@ -252,7 +252,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "ds_received",
+									"referenceName": "ds_receivedfc",
 									"type": "DatasetReference"
 								}
 							],
@@ -262,7 +262,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"foldername": {
-											"value": "@concat(\n'textdata/DEVICE/Device=',\nsubstring(item().Name,0,8),\n'/year=',\nsubstring(item().Name,9,4),\n'/month=',\nsubstring(item().Name,13,2),\n'/day=',\nsubstring(item().Name,15,2)\n\n)",
+											"value": "@concat(\n'textdata/fclive/Device=',\nsubstring(item().Name,0,8),\n'/year=',\nsubstring(item().Name,9,4),\n'/month=',\nsubstring(item().Name,13,2),\n'/day=',\nsubstring(item().Name,15,2)\n\n)",
 											"type": "Expression"
 										}
 									}

@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileSystem": "outputfccsv"
+				"fileSystem": "receivedfccsv"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
