@@ -291,7 +291,7 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Create Silver FClive data_copy1",
+							"name": "Create Silver FClive data",
 							"type": "Script",
 							"dependsOn": [],
 							"policy": {
@@ -367,7 +367,7 @@
 				}
 			},
 			{
-				"name": "Delete all files from receivedcsv",
+				"name": "Delete all files from receivedFCcsv",
 				"type": "Delete",
 				"dependsOn": [
 					{
@@ -387,7 +387,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "ds_received_bin",
+						"referenceName": "ds_receivedfc_bin1",
 						"type": "DatasetReference"
 					},
 					"enableLogging": false,

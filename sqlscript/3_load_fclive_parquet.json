@@ -5,7 +5,7 @@
 			"name": "ldw/USP"
 		},
 		"content": {
-			"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_load_fclive_parquet\nAS\nBEGIN\n\nCREATE TABLE #fclive_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #device_ymd EXEC silver.usp_get_fclive_ymd\n\nselect * from #fclive_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #fclive_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #fclive_ymd where PKid=@w\n\n        EXEC silver.usp_silver_fclive @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\nEND\n",
+			"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_load_fclive_parquet\nAS\nBEGIN\n\nCREATE TABLE #fclive_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #fclive_ymd EXEC silver.usp_get_fclive_ymd\n\nselect * from #fclive_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #fclive_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #fclive_ymd where PKid=@w\n\n        EXEC silver.usp_silver_fclive @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\nEND\n",
 			"metadata": {
 				"language": "sql"
 			},
