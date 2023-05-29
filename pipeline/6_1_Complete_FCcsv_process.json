@@ -114,7 +114,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "ds_received_bin",
+									"referenceName": "ds_receivedfc_bin1",
 									"type": "DatasetReference"
 								}
 							]
