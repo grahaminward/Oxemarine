@@ -1,5 +1,5 @@
 {
-	"name": "0_copy_mf4_from_canedge",
+	"name": "0_copy_mf4_from_canedge_old",
 	"properties": {
 		"activities": [
 			{
@@ -24,6 +24,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
