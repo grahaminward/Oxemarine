@@ -1176,7 +1176,7 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "ds_received_bin",
+											"referenceName": "ds_receivedfc_bin1",
 											"type": "DatasetReference",
 											"parameters": {}
 										}
@@ -1484,6 +1484,7 @@
 				"[concat(variables('workspaceId'), '/datasets/ds_received')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin1')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc_bin1')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_dynamic')]",
 				"[concat(variables('workspaceId'), '/linkedServices/ls_serverless_sql_pool_db_oxemarine_ldw')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_textdata')]"
