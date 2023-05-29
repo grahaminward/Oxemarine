@@ -99,21 +99,20 @@
 								"sink": {
 									"type": "BinarySink",
 									"storeSettings": {
-										"type": "AzureBlobFSWriteSettings",
-										"maxConcurrentConnections": 20
+										"type": "AzureBlobFSWriteSettings"
 									}
 								},
 								"enableStaging": false
 							},
 							"inputs": [
 								{
-									"referenceName": "ds_outputcsv_bin",
+									"referenceName": "ds_outputfccsv_bin1",
 									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "ds_received_bin",
+									"referenceName": "ds_receivedfc_bin1",
 									"type": "DatasetReference"
 								}
 							]
@@ -124,7 +123,7 @@
 		],
 		"variables": {
 			"FilesCount": {
-				"type": "String"
+				"type": "Boolean"
 			}
 		},
 		"annotations": []

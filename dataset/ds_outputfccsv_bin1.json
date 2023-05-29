@@ -1,21 +1,17 @@
 {
-	"name": "ds_receivedfc",
+	"name": "ds_outputfccsv_bin1",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_base2",
+			"referenceName": "ls_outputfccsv",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Binary",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileSystem": "outputfccsv"
-			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"quoteChar": "\""
-		},
-		"schema": []
+			}
+		}
 	}
 }
