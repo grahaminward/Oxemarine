@@ -1356,7 +1356,7 @@
 							},
 							"ifTrueActivities": [
 								{
-									"name": "Create Silver FClive data_copy1",
+									"name": "Create Silver FClive data",
 									"type": "Script",
 									"dependsOn": [],
 									"policy": {
@@ -1433,7 +1433,7 @@
 						}
 					},
 					{
-						"name": "Delete all files from receivedcsv",
+						"name": "Delete all files from receivedFCcsv",
 						"type": "Delete",
 						"dependsOn": [
 							{
@@ -1453,7 +1453,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataset": {
-								"referenceName": "ds_received_bin",
+								"referenceName": "ds_receivedfc_bin1",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -1482,9 +1482,8 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc')]",
-				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]",
-				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin1')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc_bin1')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin1')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_dynamic')]",
 				"[concat(variables('workspaceId'), '/linkedServices/ls_serverless_sql_pool_db_oxemarine_ldw')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_textdata_fclive')]"
@@ -4022,7 +4021,7 @@
 					"name": "ldw/USP"
 				},
 				"content": {
-					"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_load_fclive_parquet\nAS\nBEGIN\n\nCREATE TABLE #fclive_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #device_ymd EXEC silver.usp_get_fclive_ymd\n\nselect * from #fclive_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #fclive_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #fclive_ymd where PKid=@w\n\n        EXEC silver.usp_silver_fclive @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\nEND\n",
+					"query": "use oxemarine_ldw\nGO\n\nCREATE OR ALTER PROCEDURE silver.usp_load_fclive_parquet\nAS\nBEGIN\n\nCREATE TABLE #fclive_ymd\n(   PKid int,\n    device varchar(20),\n    year varchar(4),\n    month varchar(2),\n    day varchar(2)\n)\n\ninsert into #fclive_ymd EXEC silver.usp_get_fclive_ymd\n\nselect * from #fclive_ymd\n\ndeclare @device varchar(20), @year varchar(4), @month varchar(2), @day varchar(2),\n        @max int=(select max(PKid) from #fclive_ymd),\n        @w int=1\n\nwhile @w <= @max\nBEGIN\n        select @device=device, @year=year, @month=month, @day=day from #fclive_ymd where PKid=@w\n\n        EXEC silver.usp_silver_fclive @device,@year,@month,@day\n\n        set @w=@w+1\n\nEND\n\nEND\n",
 					"metadata": {
 						"language": "sql"
 					},
