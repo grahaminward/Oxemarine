@@ -421,22 +421,21 @@
 										"sink": {
 											"type": "BinarySink",
 											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings",
-												"maxConcurrentConnections": 20
+												"type": "AzureBlobFSWriteSettings"
 											}
 										},
 										"enableStaging": false
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_outputcsv_bin",
+											"referenceName": "ds_outputfccsv_bin1",
 											"type": "DatasetReference",
 											"parameters": {}
 										}
 									],
 									"outputs": [
 										{
-											"referenceName": "ds_received_bin",
+											"referenceName": "ds_receivedfc_bin1",
 											"type": "DatasetReference",
 											"parameters": {}
 										}
@@ -452,15 +451,15 @@
 				},
 				"variables": {
 					"FilesCount": {
-						"type": "String"
+						"type": "Boolean"
 					}
 				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc')]",
-				"[concat(variables('workspaceId'), '/datasets/ds_outputcsv_bin')]",
-				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]"
+				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin1')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc_bin1')]"
 			]
 		},
 		{
@@ -2402,6 +2401,73 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/ds_outputfccsv_bin')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_outputfccsv",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "outputfccsv"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_outputfccsv')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_outputfccsv_bin1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_outputfccsv",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "outputfccsv"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_outputfccsv')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/ds_received')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -2637,6 +2703,32 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileSystem": "outputfccsv"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_receivedfc_bin')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_base2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
 						"fileSystem": "receivedfcvsc"
 					},
 					"columnDelimiter": ",",
@@ -2644,6 +2736,28 @@
 					"quoteChar": "\""
 				},
 				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_receivedfc_bin1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_base2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "receivedfccsv"
+					}
+				}
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
