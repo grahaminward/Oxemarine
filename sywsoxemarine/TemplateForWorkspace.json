@@ -4293,7 +4293,7 @@
 					"name": "ldw"
 				},
 				"content": {
-					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.devicedetail') IS NOT NULL DROP EXTERNAL TABLE silver.devicedetail\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.devicedetail\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/devicedetail',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.device_name\n;\n\nselect * from silver.devicedetail\n\n",
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.devicedetail') IS NOT NULL DROP EXTERNAL TABLE silver.devicedetail\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.devicedetail\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/devicedetail',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.device_name\n;\n\nselect * from silver.devicedetail\norder by 1\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -4316,7 +4316,7 @@
 					"name": "ldw"
 				},
 				"content": {
-					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.faultcode') IS NOT NULL DROP EXTERNAL TABLE silver.faultcode\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.faultcode\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/faultcode',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.fault_code\n;\n\nselect * from silver.faultcode\n\n",
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.faultcode') IS NOT NULL DROP EXTERNAL TABLE silver.faultcode\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.faultcode\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/faultcode',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.fault_code\n;\n\nselect * from silver.faultcode\norder by SPN, FMI\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
