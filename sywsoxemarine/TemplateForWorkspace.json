@@ -1417,7 +1417,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"dataset": {
-											"referenceName": "ds_textdata",
+											"referenceName": "ds_textdata_fclive",
 											"type": "DatasetReference",
 											"parameters": {}
 										},
@@ -1487,7 +1487,7 @@
 				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc_bin1')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_dynamic')]",
 				"[concat(variables('workspaceId'), '/linkedServices/ls_serverless_sql_pool_db_oxemarine_ldw')]",
-				"[concat(variables('workspaceId'), '/datasets/ds_textdata')]"
+				"[concat(variables('workspaceId'), '/datasets/ds_textdata_fclive')]"
 			]
 		},
 		{
@@ -3246,6 +3246,29 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/ls_fsoxe_sub')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ds_textdata_fclive')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_base2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "textdata/fclive",
+						"fileSystem": "fs-oxe"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_base2')]"
 			]
 		},
 		{
