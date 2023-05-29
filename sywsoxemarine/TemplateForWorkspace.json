@@ -3239,7 +3239,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "textdata",
+						"folderPath": "textdata/DEVICE",
 						"fileSystem": "fs-oxe"
 					}
 				}
