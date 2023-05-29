@@ -1206,7 +1206,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataset": {
-								"referenceName": "ds_received",
+								"referenceName": "ds_receivedfc",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -1316,7 +1316,7 @@
 									},
 									"inputs": [
 										{
-											"referenceName": "ds_received",
+											"referenceName": "ds_receivedfc",
 											"type": "DatasetReference",
 											"parameters": {}
 										}
@@ -1327,7 +1327,7 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"foldername": {
-													"value": "@concat(\n'textdata/DEVICE/Device=',\nsubstring(item().Name,0,8),\n'/year=',\nsubstring(item().Name,9,4),\n'/month=',\nsubstring(item().Name,13,2),\n'/day=',\nsubstring(item().Name,15,2)\n\n)",
+													"value": "@concat(\n'textdata/fclive/Device=',\nsubstring(item().Name,0,8),\n'/year=',\nsubstring(item().Name,9,4),\n'/month=',\nsubstring(item().Name,13,2),\n'/day=',\nsubstring(item().Name,15,2)\n\n)",
 													"type": "Expression"
 												}
 											}
@@ -1481,7 +1481,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin')]",
-				"[concat(variables('workspaceId'), '/datasets/ds_received')]",
+				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_received_bin')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_outputfccsv_bin1')]",
 				"[concat(variables('workspaceId'), '/datasets/ds_receivedfc_bin1')]",
@@ -3137,7 +3137,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileSystem": "outputfccsv"
+						"fileSystem": "receivedfccsv"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
