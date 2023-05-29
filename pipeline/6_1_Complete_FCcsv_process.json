@@ -352,7 +352,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "ds_textdata",
+									"referenceName": "ds_textdata_fclive",
 									"type": "DatasetReference"
 								},
 								"enableLogging": false,
