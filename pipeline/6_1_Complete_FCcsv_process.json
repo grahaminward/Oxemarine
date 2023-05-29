@@ -291,7 +291,7 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Create Silver Device data_copy1",
+							"name": "Create Silver FClive data_copy1",
 							"type": "Script",
 							"dependsOn": [],
 							"policy": {
@@ -310,7 +310,7 @@
 								"scripts": [
 									{
 										"type": "Query",
-										"text": "EXEC silver.usp_load_parquet"
+										"text": "EXEC silver.usp_load_fclive_parquet"
 									}
 								],
 								"scriptBlockExecutionTimeout": "02:00:00"
@@ -338,8 +338,8 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Delete textdata",
-							"description": "Removes Device=8 directory structure files from text data so they are not re-processed",
+							"name": "Delete FC textdata",
+							"description": "Removes fclive directory structure files from text data so they are not re-processed",
 							"type": "Delete",
 							"dependsOn": [],
 							"policy": {

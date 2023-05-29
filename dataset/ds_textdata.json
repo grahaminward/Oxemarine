@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "textdata/DEVICE",
+				"folderPath": "textdata",
 				"fileSystem": "fs-oxe"
 			}
 		}
