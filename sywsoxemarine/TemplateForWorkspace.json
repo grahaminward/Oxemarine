@@ -3737,6 +3737,13 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "7__1_Process_run_FC",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -3750,7 +3757,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/7_Process_run')]"
+				"[concat(variables('workspaceId'), '/pipelines/7_Process_run')]",
+				"[concat(variables('workspaceId'), '/pipelines/7__1_Process_run_FC')]"
 			]
 		},
 		{
@@ -3925,7 +3933,7 @@
 					"name": "ldw"
 				},
 				"content": {
-					"query": "use oxemarine_ldw\nGO\n\nselect a.device\n        ,b.location\n        ,b.vessel\n        ,a.date_key\n        ,c.day_name\n        ,a.metric_count\nFROM (\n    select device   \n            , date_key\n            , count(1) as metric_count\n    FROM\n        silver.vw_device\n    where date_key > 20230501\n    group by device   \n            , date_key\n) a \nLEFT JOIN silver.devicedetail b\n    on a.device = b.serialnumber\nLEFT JOIN silver.calendar c\n    on a.date_key = c.date_key\nOrder by date_key desc, device\n    ",
+					"query": "use oxemarine_ldw\nGO\n\nselect a.device\n        ,b.location\n        ,b.vessel\n        ,a.date_key\n        ,c.day_name\n        ,a.metric_count\nFROM (\n    select device   \n            , date_key\n            , count(1) as metric_count\n    FROM\n        silver.vw_device\n    where date_key > 20230520\n    group by device   \n            , date_key\n) a \nLEFT JOIN silver.devicedetail b\n    on a.device = b.serialnumber\nLEFT JOIN silver.calendar c\n    on a.date_key = c.date_key\nOrder by date_key desc, device\n    ",
 					"metadata": {
 						"language": "sql"
 					},
@@ -4293,7 +4301,7 @@
 					"name": "ldw"
 				},
 				"content": {
-					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.devicedetail') IS NOT NULL DROP EXTERNAL TABLE silver.devicedetail\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.devicedetail\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/devicedetail',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.device_name\n;\n\nselect * from silver.devicedetail\norder by 1\n\n",
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.devicedetail') IS NOT NULL DROP EXTERNAL TABLE silver.devicedetail\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.devicedetail\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/devicedetail',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.device_name\n;\n\nselect * from silver.devicedetail\norder by 1\n\nupdate silver.devicedetail\nset serialnumber='D994BF29'\nwhere serialnumber='D99ABF29'\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -4477,7 +4485,7 @@
 					"name": "ldw"
 				},
 				"content": {
-					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_device\nGO\n-- create view for device views\nCREATE VIEW silver.vw_device\nAS\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    date_key = convert(int, convert(varchar(10), timestamp, 112)) ,\n    dev.*\nFROM\n    OPENROWSET(\n        BULK '/silver/DEVICE/Device=*/year=*/month=*/day=*/*/*.parquet',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'PARQUET'\n    )\n    WITH (\n        timestamp datetime2(0) ,\n        ActualClutchSlip SMALLINT ,\n        ControlheadPosition SMALLINT ,\n        PropellerSpeed FLOAT ,\n        RequestClutchSlip SMALLINT ,\n        EngineSpeed FLOAT ,\n        BoostPressure FLOAT ,\n        PttTrim SMALLINT ,\n        GearboxOilPressure FLOAT ,\n        GearboxGear SMALLINT ,\n        PressureSource SMALLINT ,\n        AtmosphericPressure FLOAT ,\n        _GearboxOilPressure FLOAT ,\n\t    _EngineOilPressure FLOAT ,\n\t    FuelRailPressure FLOAT ,\n\t    TemperatueSource SMALLINT ,\n\t    IntakeManifoldTemp FLOAT ,\n\t    EcuTemp FLOAT \n    \n    ) AS [dev]\nGO\n\nexec sp_refreshview @viewname='silver.vw_device'\n\n\nselect * from silver.vw_device\nwhere device='4CC52878' and year=2023 and month=05 and day=14\norder by timestamp\n\nselect * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=04 and day=21\norder by timestamp\n\nSELECT * FROM silver.dbc_lookup\nselect * from silver.calendar\n",
+					"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_device\nGO\n-- create view for device views\nCREATE VIEW silver.vw_device\nAS\n    SELECT\n    dev.filepath(1) as device,\n    dev.filepath(2) as year,\n    dev.filepath(3) as month,\n    dev.filepath(4) as day,\n    date_key = convert(int, convert(varchar(10), timestamp, 112)) ,\n    dev.*\nFROM\n    OPENROWSET(\n        BULK '/silver/DEVICE/Device=*/year=*/month=*/day=*/*/*.parquet',\n        DATA_SOURCE = 'oxemarine_src',\n        FORMAT = 'PARQUET'\n    )\n    WITH (\n        timestamp datetime2(0) ,\n        ActualClutchSlip SMALLINT ,\n        ControlheadPosition SMALLINT ,\n        PropellerSpeed FLOAT ,\n        RequestClutchSlip SMALLINT ,\n        EngineSpeed FLOAT ,\n        BoostPressure FLOAT ,\n        PttTrim SMALLINT ,\n        GearboxOilPressure FLOAT ,\n        GearboxGear SMALLINT ,\n        PressureSource SMALLINT ,\n        AtmosphericPressure FLOAT ,\n        _GearboxOilPressure FLOAT ,\n\t    _EngineOilPressure FLOAT ,\n\t    FuelRailPressure FLOAT ,\n\t    TemperatueSource SMALLINT ,\n\t    IntakeManifoldTemp FLOAT ,\n\t    EcuTemp FLOAT \n    \n    ) AS [dev]\nGO\n\nexec sp_refreshview @viewname='silver.vw_device'\n\n\nselect * from silver.vw_device\nwhere device='4CC52878' and year=2023 and month=05 and day=14\norder by timestamp\n\nselect * from silver.vw_device\nwhere device='D994BF29' and year=2023 and month=04 and day=21\norder by timestamp\n\n\nselect * from silver.vw_device\nwhere device='B1E6A2A6' and year=2023 and month=05 and day=29\norder by timestamp\n\n\nSELECT * FROM silver.dbc_lookup\nselect * from silver.calendar\n",
 					"metadata": {
 						"language": "sql"
 					},
