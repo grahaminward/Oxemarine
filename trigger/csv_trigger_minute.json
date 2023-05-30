@@ -10,6 +10,12 @@
 					"referenceName": "7_Process_run",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "7__1_Process_run_FC",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
