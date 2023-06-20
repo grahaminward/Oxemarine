@@ -5,7 +5,7 @@
 			"name": "ldw"
 		},
 		"content": {
-			"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.faultcode') IS NOT NULL DROP EXTERNAL TABLE silver.faultcode\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.faultcode\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/faultcode',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.fault_code\n;\n\nselect * from silver.faultcode\norder by SPN, FMI\n\n\n",
+			"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.faultcode') IS NOT NULL DROP EXTERNAL TABLE silver.faultcode\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.faultcode\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/faultcode',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.fault_code\n;\n\nselect * from silver.faultcode\nwhere SPN in (521106, 521132,521133)\norder by SPN, FMI\n\n-- Check for duplicates\nselect SPN,FMI,count(1)\nfrom silver.faultcode\ngroup by SPN,FMI\nhaving count(1) > 1\n\n\n\n\n",
 			"metadata": {
 				"language": "sql"
 			},
