@@ -5,7 +5,7 @@
 			"name": "ldw"
 		},
 		"content": {
-			"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.devicedetail') IS NOT NULL DROP EXTERNAL TABLE silver.devicedetail\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.devicedetail\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/devicedetail',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.device_name\n;\n\nselect * from silver.devicedetail\norder by 1\n\nupdate silver.devicedetail\nset serialnumber='D994BF29'\nwhere serialnumber='D99ABF29'\n\n",
+			"query": "use oxemarine_ldw\nGO\n\nif object_id('silver.devicedetail') IS NOT NULL DROP EXTERNAL TABLE silver.devicedetail\nGO\n-- cant delete file here in sql\n-- use synapse pipeline then execute this script\n\nCREATE EXTERNAL TABLE silver.devicedetail\nWITH (\n    DATA_SOURCE = oxemarine_src,\n    LOCATION = 'silver/devicedetail',\n    FILE_FORMAT = parquet_file_format\n)\nAS \nSELECT *\n    FROM bronze.device_name\n;\n\nselect * from silver.devicedetail\norder by 1\n\n\n",
 			"metadata": {
 				"language": "sql"
 			},
