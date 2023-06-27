@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "Processes any output csv files that have been processed in outputcsv",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
