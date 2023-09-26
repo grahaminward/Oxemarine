@@ -1,0 +1,20 @@
+{
+	"name": "14_Create_Silver_Devicedetail",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "use oxemarine_ldw\nGO\n\nDROP VIEW IF EXISTS silver.vw_DeviceDetail\nGO\n-- create view for device views\nCREATE VIEW silver.vw_DeviceDetail\nAS\n\n\nSELECT DeviceNumber= [serialnumber]\n,[location]\n,[vessel]\n,[contact]\n,[phone]\n,[email]\n,[FW]\n,[note]\n,[TAM]\n FROM [silver].[devicedetail]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "oxemarine_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
