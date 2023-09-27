@@ -4237,6 +4237,29 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/4_1_create_bronze_additional_data')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "ldw"
+				},
+				"content": {
+					"query": "use oxemarine_ldw\nGO\n\nif object_id('bronze.manual_data') IS NOT NULL DROP EXTERNAL TABLE bronze.manual_data\n\nCREATE EXTERNAL TABLE bronze.manual_data\n    (  timestamp datetime2(0) ,\n--ActualPressure        \n        PressureSource float ,\n        AtmosphericPressure FLOAT ,\n        FuelRailPressure FLOAT ,\n--ActuatorCommand\n      GearCommand  float , \n      ThrottleCommand float , \n--CogSogRapidUpdate      \n      CourseOverGround  float ,\n      CourseOverGround_deg float ,   \n      SpeedOverGround float ,\n      SpeedOverGround_kn float ,\n--EngineParametersDynamic   \n      EngineInstance int,\n      EngineOilPressure float ,\n      EngineOilTemp float ,\n      EngineCoolantTemp float ,\n      BatteryVoltage float ,\n      FuelRate float ,\n      TotalEngineHours FLOAT ,\n      EngineLoad FLOAT ,  \n    \n--EngineParametersRapid\n      EngineSpeed float ,\n      BoostPressure float ,\n      PttTrim float ,\n--OxeProprietary1 \n      ActualClutchSlip float ,\n      ControlheadPosition float ,\n      PropellerSpeed float ,\n      RequestClutchSlip float ,\n--OxeProprietary4\n      GpcState float ,\n      GpcDuty float ,\n      GpcModuleFaults float ,\n--PcmFeedback\n      PortCylinderPosition float ,   \n      StbdCylinderPosition float , \n--PositionRapidUpdate\n      Latitude float ,\n      Longitude float ,\n--ProductInformation     \n      EngineModel varchar(100) ,\n      EngineSwVersion varchar(100) ,\n      EngineFwVersion varchar(100) ,\n      EngineSerialnumber varchar(100) ,\n--TemperatureExtendedRange\n      TemperatureSource float ,\n      EngineRoomTemp FLOAT ,\n      ExhaustGasTemp FLOAT ,\n\tIntakeManifoldTemp FLOAT ,\n      FuelTemp FLOAT ,\n\tEcuTemp FLOAT ,\n      CompressorOutTemp FLOAT ,\n--TransmissionParametersDynamic\n      GearboxOilPressure float ,\n      GearboxGear float ,\n      GearboxOilTemp float ,\n--TripParametersEngine    \n      FuelUsed float ,\n      FuelRateAverage float \n    \n      )  \n    WITH (\n        LOCATION = 'fs-dbc/manual_data.csv',  \n        DATA_SOURCE = oxemarine_src,  \n        FILE_FORMAT = csv_file_format_pv1,\n        REJECT_VALUE = 99,\n        REJECTED_ROW_LOCATION = 'rejections/manualdata'\n    )\n;\nselect * from bronze.manual_data\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "oxemarine_ldw",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/4_create_bronze_tables')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
